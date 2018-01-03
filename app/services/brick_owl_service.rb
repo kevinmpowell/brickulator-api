@@ -6,7 +6,7 @@ class BrickOwlService
   BRICK_OWL_BASE_URL = "https://www.brickowl.com"
   SET_CATALOG_ROOT_URL = "#{BRICK_OWL_BASE_URL}/catalog/lego-sets"
   INVENTORY_PAGE_URL_SUFFIX = "/inventory"
-  SET_NUMBER_URL_REGEX = /-(\d+-*\d+)$/
+  SET_NUMBER_URL_REGEX = /-(\d+)(?:-(\d+))*$/
 
   def self.get_all_set_urls
     catalog_theme_root_urls = self.get_catalog_urls_by_theme
