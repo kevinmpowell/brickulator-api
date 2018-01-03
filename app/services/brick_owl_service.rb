@@ -8,6 +8,14 @@ class BrickOwlService
   INVENTORY_PAGE_URL_SUFFIX = "/inventory"
   SET_NUMBER_URL_REGEX = /-(\d+-*\d+)$/
 
+  def self.get_catalog_urls_by_theme
+    url = SET_CATALOG_ROOT_URL
+    doc = Nokogiri::HTML(open(url))
+    catalog_theme_links = doc.css("a[href^='/catalog/lego-sets']")
+    catalog_theme_root_urls = catalog_theme_links.map{ |l| l["href"] }
+    puts catalog_theme_root_urls
+  end
+
   def self.spider_set_catalog
     set_urls = self.recursively_scrape_set_links(SET_CATALOG_ROOT_URL, [])
     set_urls.each do |url|

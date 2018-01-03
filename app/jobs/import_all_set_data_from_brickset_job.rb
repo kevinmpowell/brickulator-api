@@ -1,4 +1,4 @@
-class ImportSetDataFromBricksetJob < ActiveJob::Base
+class ImportAllSetDataFromBricksetJob < ActiveJob::Base
   queue_as :default
 
   def perform
