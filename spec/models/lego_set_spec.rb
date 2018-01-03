@@ -9,5 +9,5 @@ RSpec.describe LegoSet, type: :model do
   # ensure columns title and created_by are present before saving
   it { should validate_presence_of(:title) }
   it { should validate_presence_of(:number) }
-  it { should validate_uniqueness_of(:number) }
+  it { should validate_uniqueness_of(:number).scoped_to(:number_variant) }
 end
