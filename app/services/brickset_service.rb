@@ -8,7 +8,7 @@ class BricksetService
   ONE_YEAR_IN_MINUTES = TWENTY_FOUR_HOURS_IN_MINUTES * 365
 
   def self.get_sets updated_minutes_ago = nil
-    minutes_ago = update_minutes_ago || ONE_YEAR_IN_MINUTES
+    minutes_ago = updated_minutes_ago || ONE_YEAR_IN_MINUTES
     uri = URI.parse("https://brickset.com/api/v2.asmx/getRecentlyUpdatedSets?apiKey=#{API_KEY}&minutesAgo=#{minutes_ago}")
     response = Net::HTTP.get_response(uri)
     sets = Hash.from_xml(response.body)
