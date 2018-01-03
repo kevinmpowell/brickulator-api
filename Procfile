@@ -1,2 +1,2 @@
 web: bundle exec puma
-worker: bundle exec sidekiq -t 5
+worker: bundle exec sidekiq -C config/sidekiq.yml
