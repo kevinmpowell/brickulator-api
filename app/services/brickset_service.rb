@@ -3,9 +3,18 @@ require 'net/http'
 
 class BricksetService
   API_KEY = ENV['BRICKSET_API_KEY']
+  BASE_URL = "https://brickset.com/api/v2.asmx/"
 
   def self.get_sets_for_year year=2018
-    uri = URI.parse("https://brickset.com/api/v2.asmx/getSets?apiKey=aVIg-VKan-SSCw&userHash=&query=&theme=&subtheme=&setNumber=&owned=&wanted=&orderBy=&pageNumber=1&userName=&year=#{year}&pageSize=5000")
+    uri = URI.parse("#{BASE_URL}getSets?apiKey=#{API_KEY}&userHash=&query=&theme=&subtheme=&setNumber=&owned=&wanted=&orderBy=&pageNumber=1&userName=&year=#{year}&pageSize=5000")
+    response = Net::HTTP.get_response(uri)
+    sets = Hash.from_xml(response.body)
+    sets["ArrayOfSets"]["sets"]
+  end
+
+  def self.get_all_sets_updated_in_the_last_x_hours(hours)
+    minutes = hours.to_i * 60
+    uri = URI.parse("#{BASE_URL}getRecentlyUpdatedSets?apiKey=#{API_KEY}&minutesAgo=#{minutes}")
     response = Net::HTTP.get_response(uri)
     sets = Hash.from_xml(response.body)
     sets["ArrayOfSets"]["sets"]
