@@ -26,6 +26,7 @@ gem 'redis'
 gem 'rack-cors'
 gem 'active_model_serializers', '~> 0.10.0'
 gem 'sidekiq'
+gem 'sidekiq-failures'
 gem 'nokogiri'
 
 group :test do
