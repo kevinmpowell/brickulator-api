@@ -12,6 +12,9 @@
 
 ActiveRecord::Schema.define(version: 20171230182824) do
 
+  # These are extensions that must be enabled in order to support this database
+  enable_extension "plpgsql"
+
   create_table "brick_owl_values", force: :cascade do |t|
     t.datetime "retrieved_at"
     t.float "part_out_value_new"
