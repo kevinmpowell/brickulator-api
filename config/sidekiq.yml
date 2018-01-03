@@ -1,6 +1,9 @@
-development:  
-  :concurrency: 5
-production:  
-  :concurrency: 20
+:concurrency: 4
+staging:
+  :concurrency: 4
+production:
+  :concurrency: 4
+:logfile: ./log/sidekiq.log
 :queues:
+  - priority
   - default
