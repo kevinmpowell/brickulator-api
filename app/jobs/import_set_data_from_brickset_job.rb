@@ -11,7 +11,7 @@ class ImportSetDataFromBricksetJob < ActiveJob::Base
 
   def recursively_import_set_data_from_brickset_for_year year, counter
     bail_out_after = 80
-    if (count < bail_out_after)
+    if (counter < bail_out_after)
       set_data = BricksetService.get_sets_for_year(year)
       if set_data.nil?
         puts "ERROR: No set data pulled from Brickset for #{year}"
