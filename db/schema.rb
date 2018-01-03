@@ -10,7 +10,21 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171227201825) do
+ActiveRecord::Schema.define(version: 20171230182824) do
+
+  create_table "brick_owl_values", force: :cascade do |t|
+    t.datetime "retrieved_at"
+    t.float "part_out_value_new"
+    t.float "part_out_value_used"
+    t.float "current_avg_price"
+    t.float "current_high_price"
+    t.float "current_low_price"
+    t.integer "current_listings"
+    t.integer "lego_set_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["lego_set_id"], name: "index_brick_owl_values_on_lego_set_id"
+  end
 
   create_table "ebay_sales", force: :cascade do |t|
     t.datetime "date"
@@ -31,6 +45,8 @@ ActiveRecord::Schema.define(version: 20171227201825) do
     t.datetime "updated_at", null: false
     t.float "msrp"
     t.integer "year"
+    t.integer "part_count"
+    t.string "brick_owl_url"
   end
 
 end
