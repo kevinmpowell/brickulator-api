@@ -8,27 +8,21 @@ class BrickOwlService
   INVENTORY_PAGE_URL_SUFFIX = "/inventory"
   SET_NUMBER_URL_REGEX = /-(\d+-*\d+)$/
 
+  def self.get_all_set_urls
+    catalog_theme_root_urls = self.get_catalog_urls_by_theme
+    set_urls = []
+    catalog_theme_root_urls.each do |root_url|
+      set_urls = self.recursively_scrape_set_links("#{BRICK_OWL_BASE_URL}#{root_url}", set_urls)
+    end
+    set_urls
+  end
+
   def self.get_catalog_urls_by_theme
     url = SET_CATALOG_ROOT_URL
     doc = Nokogiri::HTML(open(url))
-    catalog_theme_links = doc.css("a[href^='/catalog/lego-sets']")
-    catalog_theme_root_urls = catalog_theme_links.map{ |l| l["href"] }
-    puts catalog_theme_root_urls
-  end
-
-  def self.spider_set_catalog
-    set_urls = self.recursively_scrape_set_links(SET_CATALOG_ROOT_URL, [])
-    set_urls.each do |url|
-      url.scan(SET_NUMBER_URL_REGEX) do |set_number|
-        set = LegoSet.where({number: set_number}).first
-        if set.nil? 
-          puts "NOT FOUND: Cannot find set with set number: #{set_number}"
-        else
-          set.update_attributes({brick_owl_url: url})
-          puts "#{set_number} brick owl url: #{url}"
-        end
-      end
-    end
+    catalog_theme_links = doc.css("a[href^='/catalog/lego-sets/']")
+    catalog_theme_root_urls = catalog_theme_links.map{ |l| l["href"] }.uniq
+    catalog_theme_root_urls
   end
 
   def self.recursively_scrape_set_links url, set_urls
