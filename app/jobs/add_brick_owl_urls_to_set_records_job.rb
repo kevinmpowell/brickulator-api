@@ -9,22 +9,28 @@ class AddBrickOwlUrlsToSetRecordsJob < ActiveJob::Base
     set_urls = BrickOwlService.get_all_set_urls
     set_urls.each do |url|
       matches = url.scan(BrickOwlService::SET_NUMBER_URL_REGEX)
-      matches = matches.first unless matches.nil? # For some reason the resulting matches are in an outer array, remove it
-      search_attributes = {
-        number: matches.first
-      }
-      if !matches.last.nil?
-        # There is a variant number
-        search_attributes[:number_variant] = matches.last
+      if matches.empty?
+        puts "COULD NOT EXTRACT PART NUMBER FROM: #{url}"
+      else
+        matches = matches.first # For some reason the resulting matches are in an outer array, remove it
+        search_attributes = {
+          number: matches.first
+        }
+        if !matches.last.nil?
+          # There is a variant number
+          search_attributes[:number_variant] = matches.last
+        end
+
+        set = LegoSet.where(search_attributes).first
+        if set.nil? 
+          puts "NOT FOUND: Cannot find set with set number: #{matches.first}"
+        else
+          set.update_attributes({brick_owl_url: url})
+          puts "#{matches.first} brick owl url: #{url}"
+        end
+      
       end
 
-      set = LegoSet.where(search_attributes).first
-      if set.nil? 
-        puts "NOT FOUND: Cannot find set with set number: #{matches.first}"
-      else
-        set.update_attributes({brick_owl_url: url})
-        puts "#{matches.first} brick owl url: #{url}"
-      end
     end
   end
 end

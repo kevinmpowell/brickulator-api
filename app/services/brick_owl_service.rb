@@ -11,7 +11,7 @@ class BrickOwlService
   def self.get_all_set_urls
     catalog_theme_root_urls = self.get_catalog_urls_by_theme
     set_urls = []
-    catalog_theme_root_urls.each do |root_url|
+    catalog_theme_root_urls.slice(30, 1).each do |root_url|
       set_urls = self.recursively_scrape_set_links("#{BRICK_OWL_BASE_URL}#{root_url}", set_urls)
     end
     set_urls
