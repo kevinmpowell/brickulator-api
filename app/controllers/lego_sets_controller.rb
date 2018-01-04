@@ -6,7 +6,7 @@ class LegoSetsController < ApplicationController
     @lego_sets = LegoSet.all
     @id_tagged_sets = {}
 
-    @lego_sets.includes(:ebay_sales, :brick_owl_values).where('year >= ?', 1990).each do |set|
+    @lego_sets.includes(:ebay_sales, :brick_owl_values).where('year >= ?', 1999).each do |set|
       ebay = set.ebay_sales.first
       bo = set.brick_owl_values.first
       set = set.as_json
