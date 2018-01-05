@@ -50,6 +50,7 @@ class LegoSet < ApplicationRecord
         if !set[:nv].nil?
           set_key = set_key + "-" + set[:nv]
         end
+        set[:k] = set_key
         @id_tagged_sets[set_key] = set
       end
       @id_tagged_sets
