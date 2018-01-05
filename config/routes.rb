@@ -4,7 +4,7 @@ require 'sidekiq/web'
 Rails.application.routes.draw do
   mount Sidekiq::Web => '/sidekiq'
 
-  resources :lego_sets, only: [:index, :show] do
+  resources :lego_sets, only: [:index, :show], constraints: lambda { |request| request.xhr? } do
     resources :ebay_sales, only: [:index]
   end
 end
