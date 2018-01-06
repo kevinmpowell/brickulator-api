@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180103025904) do
+ActiveRecord::Schema.define(version: 20180106041314) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -19,13 +19,38 @@ ActiveRecord::Schema.define(version: 20180103025904) do
     t.datetime "retrieved_at"
     t.float "part_out_value_new"
     t.float "part_out_value_used"
-    t.float "current_avg_price"
-    t.float "current_high_price"
-    t.float "current_low_price"
-    t.integer "current_listings"
-    t.integer "lego_set_id"
+    t.bigint "lego_set_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "complete_set_new_listings_count"
+    t.float "complete_set_new_avg_price"
+    t.float "complete_set_new_median_price"
+    t.float "complete_set_new_high_price"
+    t.float "complete_set_new_low_price"
+    t.integer "complete_set_used_listings_count"
+    t.float "complete_set_used_avg_price"
+    t.float "complete_set_used_median_price"
+    t.float "complete_set_used_high_price"
+    t.float "complete_set_used_low_price"
+    t.integer "instructions_listings_count"
+    t.float "instructions_median_price"
+    t.float "instructions_avg_price"
+    t.float "instructions_high_price"
+    t.float "instructions_low_price"
+    t.integer "packaging_listings_count"
+    t.float "packaging_median_price"
+    t.float "packaging_avg_price"
+    t.float "packaging_high_price"
+    t.float "packaging_low_price"
+    t.integer "sticker_listings_count"
+    t.float "sticker_median_price"
+    t.float "sticker_avg_price"
+    t.float "sticker_high_price"
+    t.float "sticker_low_price"
+    t.float "total_minifigure_value_high"
+    t.float "total_minifigure_value_low"
+    t.float "total_minifigure_value_avg"
+    t.float "total_minifigure_value_median"
     t.index ["lego_set_id"], name: "index_brick_owl_values_on_lego_set_id"
   end
 
@@ -35,7 +60,7 @@ ActiveRecord::Schema.define(version: 20180103025904) do
     t.float "high_sale"
     t.float "low_sale"
     t.integer "listings"
-    t.integer "lego_set_id"
+    t.bigint "lego_set_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["lego_set_id"], name: "index_ebay_sales_on_lego_set_id"
@@ -59,4 +84,6 @@ ActiveRecord::Schema.define(version: 20180103025904) do
     t.index ["number", "number_variant"], name: "index_lego_sets_on_number_and_number_variant", unique: true
   end
 
+  add_foreign_key "brick_owl_values", "lego_sets"
+  add_foreign_key "ebay_sales", "lego_sets"
 end

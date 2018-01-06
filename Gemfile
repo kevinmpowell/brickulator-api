@@ -28,6 +28,7 @@ gem 'active_model_serializers', '~> 0.10.0'
 gem 'sidekiq'
 gem 'sidekiq-failures'
 gem 'nokogiri'
+gem "simple_stats" #mean, median, & mode for arrays
 
 group :test do
   gem 'factory_bot_rails'
