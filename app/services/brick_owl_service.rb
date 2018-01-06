@@ -6,7 +6,7 @@ class BrickOwlService
   BRICK_OWL_BASE_URL = "https://www.brickowl.com"
   SET_CATALOG_ROOT_URL = "#{BRICK_OWL_BASE_URL}/catalog/lego-sets"
   QUERY_URL = "#{BRICK_OWL_BASE_URL}/search/catalog?query="
-  INVENTORY_PAGE_URL_SUFFIX = "/inventory"
+  INVENTORY_PAGE_URL_SUFFIX = "/inventory?display=table"
   SET_NUMBER_URL_REGEX = /-((?:sdcc)*\d+)(?:-(\d+))*$/
 
   def self.c_to_f string
@@ -60,8 +60,9 @@ class BrickOwlService
     doc = Nokogiri::HTML(open(sticker_url))
     prices = []
 
+    empty_table = doc.css(".buy-table .empty.message")
     listings = doc.css(".buy-table tbody tr")
-    if !listings.nil?
+    if !listings.nil? && empty_table.nil?
       listings.each do |row|
         # Qty for sale is in the 4th column, need to spread prices out so mean and mode can be calculated correctly
         qty_available = row.css("td:nth-child(4)").first.text.to_i
@@ -89,8 +90,9 @@ class BrickOwlService
     doc = Nokogiri::HTML(open(packaging_url))
     prices = []
 
+    empty_table = doc.css(".buy-table .empty.message")
     listings = doc.css(".buy-table tbody tr")
-    if !listings.nil?
+    if !listings.nil? && empty_table.nil?
       listings.each do |row|
         # Qty for sale is in the 4th column, need to spread prices out so mean and mode can be calculated correctly
         qty_available = row.css("td:nth-child(4)").first.text.to_i
@@ -118,8 +120,9 @@ class BrickOwlService
     doc = Nokogiri::HTML(open(instructions_url))
     prices = []
 
+    empty_table = doc.css(".buy-table .empty.message")
     listings = doc.css(".buy-table tbody tr")
-    if !listings.nil?
+    if !listings.nil? && empty_table.nil?
       listings.each do |row|
         # Qty for sale is in the 4th column, need to spread prices out so mean and mode can be calculated correctly
         qty_available = row.css("td:nth-child(4)").first.text.to_i
@@ -157,6 +160,73 @@ class BrickOwlService
       data[:part_out_value_used] = BrickOwlService.c_to_f(part_out_values[1].text) unless part_out_values[1].nil?
     end
 
+    minifig_data = get_minifig_totals_data(doc)
+    data = data.merge(minifig_data)
+
+    data
+  end
+
+  def self.get_minifig_totals_data doc
+    data = {}
+    minifig_inventory_data = []
+    individual_minifig_values = []
+    inventory_rows = doc.css(".inv-table tbody tr")
+
+    inventory_rows.each do |row|
+      part_link = row.css("td:nth-child(4) a").first
+      if part_link.text.downcase.include?('minifigure')
+        minifig_inventory_data << {url: part_link['href'], qty: row.css("td:nth-child(1)").first.text.to_i}
+      else
+        break
+      end
+    end
+
+    unless minifig_inventory_data.empty?
+      minifig_inventory_data.each do |d|
+        fig_values = get_individual_minifig_data(d[:url])
+        fig_values[:qty_of_fig_in_set] = d[:qty]
+        individual_minifig_values << fig_values
+      end
+    end
+
+    unless individual_minifig_values.empty?
+      data[:total_minfigure_value_high] = individual_minifig_values.sum{ |d| d[:high_price] * d[:qty_of_fig_in_set] }
+      data[:total_minfigure_value_low] = individual_minifig_values.sum{ |d| d[:low_price] * d[:qty_of_fig_in_set] }
+      data[:total_minfigure_value_avg] = individual_minifig_values.sum{ |d| d[:avg_price] * d[:qty_of_fig_in_set] }
+      data[:total_minfigure_value_median] = individual_minifig_values.sum{ |d| d[:median_price] * d[:qty_of_fig_in_set] }
+    end
+
+    data
+  end
+
+  def self.get_individual_minifig_data url
+    data = {}
+    prices = []
+    doc = Nokogiri::HTML(open("#{BRICK_OWL_BASE_URL}#{url}"))
+
+    empty_table = doc.css(".buy-table .empty.message")
+    listings = doc.css(".buy-table tbody tr")
+
+    if !listings.nil? && empty_table.nil?
+      listings.each do |row|
+        # Qty for sale is in the 4th column, need to spread prices out so mean and mode can be calculated correctly
+        qty_available = row.css("td:nth-child(4)").first.text.to_i
+        price = BrickOwlService.c_to_f(row.css("td:nth-child(5) .price").first.text)
+
+        qty_available.times do
+          prices << price
+        end
+      end
+
+      unless prices.empty?
+        data[:listings_count] = prices.count
+        data[:avg_price] = prices.mean.round(2)
+        data[:median_price] = prices.median.round(2)
+        data[:high_price] = prices.max
+        data[:low_price] = prices.min
+      end
+    end
+
     data
   end
 
@@ -165,8 +235,9 @@ class BrickOwlService
     new_set_prices = []
     used_set_prices = []
 
+    empty_table = doc.css(".buy-table .empty.message")
     listings = doc.css(".buy-table tbody tr")
-    if !listings.nil?
+    if !listings.nil? && empty_table.nil?
       listings.each do |row|
         new_listing = row.css("td:nth-child(2)").first.text.downcase.include?("new")
         # Qty for sale is in the 4th column, need to spread prices out so mean and mode can be calculated correctly
