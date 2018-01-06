@@ -60,16 +60,18 @@ class BrickOwlService
     doc = Nokogiri::HTML(open(sticker_url))
     prices = []
 
-    empty_table = doc.css(".buy-table .empty.message")
     listings = doc.css(".buy-table tbody tr")
-    if !listings.nil? && empty_table.nil?
+    if !listings.nil?
       listings.each do |row|
-        # Qty for sale is in the 4th column, need to spread prices out so mean and mode can be calculated correctly
-        qty_available = row.css("td:nth-child(4)").first.text.to_i
-        price = BrickOwlService.c_to_f(row.css("td:nth-child(5) .price").first.text)
+        qty_available = row.css("td:nth-child(4)").first
+        if !qty_available.nil? #Will be nil if the table is empty
+          # Qty for sale is in the 4th column, need to spread prices out so mean and mode can be calculated correctly
+          qty_available = qty_available.text.to_i
+          price = BrickOwlService.c_to_f(row.css("td:nth-child(5) .price").first.text)
 
-        qty_available.times do
-          prices << price
+          qty_available.times do
+            prices << price
+          end
         end
       end
 
@@ -90,16 +92,18 @@ class BrickOwlService
     doc = Nokogiri::HTML(open(packaging_url))
     prices = []
 
-    empty_table = doc.css(".buy-table .empty.message")
     listings = doc.css(".buy-table tbody tr")
-    if !listings.nil? && empty_table.nil?
+    if !listings.nil?
       listings.each do |row|
-        # Qty for sale is in the 4th column, need to spread prices out so mean and mode can be calculated correctly
-        qty_available = row.css("td:nth-child(4)").first.text.to_i
-        price = BrickOwlService.c_to_f(row.css("td:nth-child(5) .price").first.text)
+        qty_available = row.css("td:nth-child(4)").first
+        if !qty_available.nil? #Will be nil if the table is empty
+          # Qty for sale is in the 4th column, need to spread prices out so mean and mode can be calculated correctly
+          qty_available = qty_available.text.to_i
+          price = BrickOwlService.c_to_f(row.css("td:nth-child(5) .price").first.text)
 
-        qty_available.times do
-          prices << price
+          qty_available.times do
+            prices << price
+          end
         end
       end
 
@@ -120,16 +124,18 @@ class BrickOwlService
     doc = Nokogiri::HTML(open(instructions_url))
     prices = []
 
-    empty_table = doc.css(".buy-table .empty.message")
     listings = doc.css(".buy-table tbody tr")
-    if !listings.nil? && empty_table.nil?
+    if !listings.nil?
       listings.each do |row|
-        # Qty for sale is in the 4th column, need to spread prices out so mean and mode can be calculated correctly
-        qty_available = row.css("td:nth-child(4)").first.text.to_i
-        price = BrickOwlService.c_to_f(row.css("td:nth-child(5) .price").first.text)
+        qty_available = row.css("td:nth-child(4)").first
+        if !qty_available.nil? #Will be nil if the table is empty
+          # Qty for sale is in the 4th column, need to spread prices out so mean and mode can be calculated correctly
+          qty_available = qty_available.text.to_i
+          price = BrickOwlService.c_to_f(row.css("td:nth-child(5) .price").first.text)
 
-        qty_available.times do
-          prices << price
+          qty_available.times do
+            prices << price
+          end
         end
       end
 
@@ -189,6 +195,8 @@ class BrickOwlService
       end
     end
 
+    puts individual_minifig_values.to_yaml
+
     unless individual_minifig_values.empty?
       data[:total_minfigure_value_high] = individual_minifig_values.sum{ |d| d[:high_price] * d[:qty_of_fig_in_set] }
       data[:total_minfigure_value_low] = individual_minifig_values.sum{ |d| d[:low_price] * d[:qty_of_fig_in_set] }
@@ -204,17 +212,19 @@ class BrickOwlService
     prices = []
     doc = Nokogiri::HTML(open("#{BRICK_OWL_BASE_URL}#{url}"))
 
-    empty_table = doc.css(".buy-table .empty.message")
     listings = doc.css(".buy-table tbody tr")
 
-    if !listings.nil? && empty_table.nil?
+    if !listings.nil?
       listings.each do |row|
-        # Qty for sale is in the 4th column, need to spread prices out so mean and mode can be calculated correctly
-        qty_available = row.css("td:nth-child(4)").first.text.to_i
-        price = BrickOwlService.c_to_f(row.css("td:nth-child(5) .price").first.text)
+        qty_available = row.css("td:nth-child(4)").first
+        if !qty_available.nil? # Will be nil if the table is empty
+          # Qty for sale is in the 4th column, need to spread prices out so mean and mode can be calculated correctly
+          qty_available = qty_available.text.to_i
+          price = BrickOwlService.c_to_f(row.css("td:nth-child(5) .price").first.text)
 
-        qty_available.times do
-          prices << price
+          qty_available.times do
+            prices << price
+          end
         end
       end
 
@@ -235,21 +245,23 @@ class BrickOwlService
     new_set_prices = []
     used_set_prices = []
 
-    empty_table = doc.css(".buy-table .empty.message")
     listings = doc.css(".buy-table tbody tr")
-    if !listings.nil? && empty_table.nil?
+    if !listings.nil?
       listings.each do |row|
-        new_listing = row.css("td:nth-child(2)").first.text.downcase.include?("new")
-        # Qty for sale is in the 4th column, need to spread prices out so mean and mode can be calculated correctly
-        qty_available = row.css("td:nth-child(4)").first.text.to_i
-        price = BrickOwlService.c_to_f(row.css("td:nth-child(5) .price").first.text)
+        new_listing = row.css("td:nth-child(2)").first
+        if !new_listing.nil? # Will be nil if the table is empty
+          new_listing = new_listing.text.downcase.include?("new")
+          # Qty for sale is in the 4th column, need to spread prices out so mean and mode can be calculated correctly
+          qty_available = row.css("td:nth-child(4)").first.text.to_i
+          price = BrickOwlService.c_to_f(row.css("td:nth-child(5) .price").first.text)
 
-        qty_available.times do
-          if new_listing
-            new_set_prices << price
-          else
-            used_set_prices << price
-          end 
+          qty_available.times do
+            if new_listing
+              new_set_prices << price
+            else
+              used_set_prices << price
+            end 
+          end
         end
       end
 
