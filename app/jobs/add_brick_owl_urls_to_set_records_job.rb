@@ -14,9 +14,9 @@ class AddBrickOwlUrlsToSetRecordsJob < ActiveJob::Base
       else
         matches = matches.first # For some reason the resulting matches are in an outer array, remove it
         search_attributes = {
-          number: matches.first
+          number: matches[0]
         }
-        if !matches.last.nil?
+        if !matches[1].nil?
           # There is a variant number
           search_attributes[:number_variant] = matches.last
         end

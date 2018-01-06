@@ -5,8 +5,20 @@ require 'open-uri'
 class BrickOwlService
   BRICK_OWL_BASE_URL = "https://www.brickowl.com"
   SET_CATALOG_ROOT_URL = "#{BRICK_OWL_BASE_URL}/catalog/lego-sets"
+  QUERY_URL = "#{BRICK_OWL_BASE_URL}/search/catalog?query="
   INVENTORY_PAGE_URL_SUFFIX = "/inventory"
-  SET_NUMBER_URL_REGEX = /-(\d+)(?:-(\d+))*$/
+  SET_NUMBER_URL_REGEX = /-((?:sdcc)*\d+)(?:-(\d+))*$/
+
+  def self.find_brick_owl_urls_by_set_number number_with_variant
+    url = "#{QUERY_URL}#{number_with_variant}"
+    doc = Nokogiri::HTML(open(url))
+    set_links = doc.css(".category-item-name a")
+    if set_links.count < 60
+      set_links.map{ |l| l["href"] }
+    else
+      []
+    end
+  end
 
   def self.get_all_set_urls
     catalog_theme_root_urls = self.get_catalog_urls_by_theme
@@ -29,8 +41,6 @@ class BrickOwlService
     doc = Nokogiri::HTML(open(url))
     set_links = doc.css(".category-item-name a")
     set_urls = set_urls + set_links.map{ |l| l["href"] }
-
-    puts ("SETS FOUND: #{set_urls.count}")
 
     next_page_link = doc.css("a[title='Next']")
     if next_page_link.count == 0 #No more next page, return all the urls

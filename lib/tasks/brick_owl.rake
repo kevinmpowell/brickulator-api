@@ -6,4 +6,8 @@ namespace :brick_owl do
   def add_brick_owl_urls_to_sets
     AddBrickOwlUrlsToSetRecordsJob.perform_later
   end
+
+  def add_missing_brick_owl_urls_to_sets
+    AddMissingBrickOwlUrlsToSetsJob.perform_later
+  end
 end
