@@ -198,10 +198,10 @@ class BrickOwlService
     puts individual_minifig_values.to_yaml
 
     unless individual_minifig_values.empty?
-      data[:total_minfigure_value_high] = individual_minifig_values.sum{ |d| d[:high_price] * d[:qty_of_fig_in_set] }
-      data[:total_minfigure_value_low] = individual_minifig_values.sum{ |d| d[:low_price] * d[:qty_of_fig_in_set] }
-      data[:total_minfigure_value_avg] = individual_minifig_values.sum{ |d| d[:avg_price] * d[:qty_of_fig_in_set] }
-      data[:total_minfigure_value_median] = individual_minifig_values.sum{ |d| d[:median_price] * d[:qty_of_fig_in_set] }
+      data[:total_minifigure_value_high] = individual_minifig_values.sum{ |d| d[:high_price] * d[:qty_of_fig_in_set] }
+      data[:total_minifigure_value_low] = individual_minifig_values.sum{ |d| d[:low_price] * d[:qty_of_fig_in_set] }
+      data[:total_minifigure_value_avg] = individual_minifig_values.sum{ |d| d[:avg_price] * d[:qty_of_fig_in_set] }
+      data[:total_minifigure_value_median] = individual_minifig_values.sum{ |d| d[:median_price] * d[:qty_of_fig_in_set] }
     end
 
     data
