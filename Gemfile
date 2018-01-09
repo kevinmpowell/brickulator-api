@@ -30,6 +30,7 @@ gem 'sidekiq-failures'
 gem 'nokogiri'
 gem "simple_stats" #mean, median, & mode for arrays
 gem "lograge"
+gem 'sidekiq-limit_fetch'
 
 group :test do
   gem 'factory_bot_rails'

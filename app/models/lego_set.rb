@@ -5,25 +5,45 @@ class LegoSet < ApplicationRecord
   validates_presence_of :title, :number
   validates_uniqueness_of :number, scope: :number_variant
 
+  # Could also include and preload most-recent book this way for lists if you wanted
+  has_one :most_recent_brick_owl_value, -> { where(:most_recent => true) }, :class_name => 'BrickOwlValue'
+
+  scope :last_brick_owl_value_retrieved, -> { joins(:brick_owl_values).where(:brick_owl_values => { :most_recent => true})}
+
   def LegoSet.all_sets_as_object
     Rails.cache.fetch("all_sets_as_json", :expires_in => 15.minutes) do
       @lego_sets = LegoSet.all
       @id_tagged_sets = {}
 
-      @lego_sets.includes(:ebay_sales, :brick_owl_values).where('year >= ?', 2014).order(:year, :number).each do |set|
-        ebay = set.ebay_sales.first
+      @lego_sets.includes(:most_recent_brick_owl_value).where('year >= ?', 2014).order(:year, :number).each do |set|
+        # ebay = set.ebay_sales.first
         bo = set.brick_owl_values.first
         set = set.as_json
-        if !ebay.nil?
-          set[:ebAN] = ebay.avg_sales
-          set[:ebLN] = ebay.low_sale
-          set[:ebHN] = ebay.high_sale
-          set[:ebl] = ebay.listings
-        end
+        # if !ebay.nil?
+        #   set[:ebAN] = ebay.avg_sales
+        #   set[:ebLN] = ebay.low_sale
+        #   set[:ebHN] = ebay.high_sale
+        #   set[:ebl] = ebay.listings
+        # end
 
         if !bo.nil?
-          set[:boPOU] = bo.part_out_value_used
-          set[:boPON] = bo.part_out_value_new
+          set[:boRA] = bo.retrieved_at
+          set[:boPOU] = bo.part_out_value_used unless bo.part_out_value_used.nil?
+          set[:boPON] = bo.part_out_value_new unless bo.part_out_value_new.nil?
+          set[:boCSNLC] = bo.complete_set_new_listings_count unless bo.complete_set_new_listings_count.nil?
+          set[:boCSNA] = bo.complete_set_new_avg_price unless bo.complete_set_new_avg_price.nil?
+          set[:boCSNM] = bo.complete_set_new_median_price unless bo.complete_set_new_median_price.nil?
+          set[:boCSNH] = bo.complete_set_new_high_price unless bo.complete_set_new_high_price.nil?
+          set[:boCSNL] = bo.complete_set_new_low_price unless bo.complete_set_new_low_price.nil?
+          set[:boCSULC] = bo.complete_set_used_listings_count unless bo.complete_set_used_listings_count.nil?
+          set[:boCSUA] = bo.complete_set_used_avg_price unless bo.complete_set_used_avg_price.nil?
+          set[:boCSUM] = bo.complete_set_used_median_price unless bo.complete_set_used_median_price.nil?
+          set[:boCSUH] = bo.complete_set_used_high_price unless bo.complete_set_used_high_price.nil?
+          set[:boCSUL] = bo.complete_set_used_low_price unless bo.complete_set_used_low_price.nil?
+          set[:boMA] = bo.total_minifigure_value_avg unless bo.total_minifigure_value_avg.nil?
+          set[:boMM] = bo.total_minifigure_value_median unless bo.total_minifigure_value_median.nil?
+          set[:boMH] = bo.total_minifigure_value_high unless bo.total_minifigure_value_high.nil?
+          set[:boML] = bo.total_minifigure_value_low unless bo.total_minifigure_value_low.nil?
         end
 
         set[:t] = set['title']

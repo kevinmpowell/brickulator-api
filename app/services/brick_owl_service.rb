@@ -64,7 +64,9 @@ class BrickOwlService
     if !listings.nil?
       listings.each do |row|
         qty_available = row.css("td:nth-child(4)").first
-        if !qty_available.nil? #Will be nil if the table is empty
+        if qty_available.nil? #Will be nil if the table is empty
+          data[:sticker_listings_count] = 0
+        else
           # Qty for sale is in the 4th column, need to spread prices out so mean and mode can be calculated correctly
           qty_available = qty_available.text.to_i
           price = BrickOwlService.c_to_f(row.css("td:nth-child(5) .price").first.text)
@@ -96,7 +98,9 @@ class BrickOwlService
     if !listings.nil?
       listings.each do |row|
         qty_available = row.css("td:nth-child(4)").first
-        if !qty_available.nil? #Will be nil if the table is empty
+        if qty_available.nil? #Will be nil if the table is empty
+          data[:packaging_listings_count] = 0
+        else
           # Qty for sale is in the 4th column, need to spread prices out so mean and mode can be calculated correctly
           qty_available = qty_available.text.to_i
           price = BrickOwlService.c_to_f(row.css("td:nth-child(5) .price").first.text)
@@ -128,7 +132,9 @@ class BrickOwlService
     if !listings.nil?
       listings.each do |row|
         qty_available = row.css("td:nth-child(4)").first
-        if !qty_available.nil? #Will be nil if the table is empty
+        if qty_available.nil? #Will be nil if the table is empty
+          data[:instructions_listings_count] = 0
+        else
           # Qty for sale is in the 4th column, need to spread prices out so mean and mode can be calculated correctly
           qty_available = qty_available.text.to_i
           price = BrickOwlService.c_to_f(row.css("td:nth-child(5) .price").first.text)
@@ -195,8 +201,6 @@ class BrickOwlService
       end
     end
 
-    puts individual_minifig_values.to_yaml
-
     unless individual_minifig_values.empty?
       data[:total_minifigure_value_high] = individual_minifig_values.sum{ |d| d[:high_price].nil? ? 0 : d[:high_price] * d[:qty_of_fig_in_set] }
       data[:total_minifigure_value_low] = individual_minifig_values.sum{ |d| d[:low_price].nil? ? 0 : d[:low_price] * d[:qty_of_fig_in_set] }
@@ -217,7 +221,9 @@ class BrickOwlService
     if !listings.nil?
       listings.each do |row|
         qty_available = row.css("td:nth-child(4)").first
-        if !qty_available.nil? # Will be nil if the table is empty
+        if qty_available.nil? # Will be nil if the table is empty
+          data[:listings_count] = 0
+        else
           # Qty for sale is in the 4th column, need to spread prices out so mean and mode can be calculated correctly
           qty_available = qty_available.text.to_i
           price = BrickOwlService.c_to_f(row.css("td:nth-child(5) .price").first.text)
@@ -249,7 +255,10 @@ class BrickOwlService
     if !listings.nil?
       listings.each do |row|
         new_listing = row.css("td:nth-child(2)").first
-        if !new_listing.nil? # Will be nil if the table is empty
+        if new_listing.nil? # Will be nil if the table is empty
+          data[:complete_set_new_listings_count] = 0
+          data[:complete_set_used_listings_count] = 0
+        else
           new_listing = new_listing.text.downcase.include?("new")
           # Qty for sale is in the 4th column, need to spread prices out so mean and mode can be calculated correctly
           qty_available = row.css("td:nth-child(4)").first.text.to_i

@@ -7,8 +7,8 @@ namespace :brick_owl do
     add_missing_brick_owl_urls_to_sets
   end
 
-  task :get_all_set_values_from_brick_owl => :environment do
-    get_all_set_values_from_brick_owl
+  task :get_all_set_values => :environment do
+    get_all_set_values
   end
 
   def add_brick_owl_urls_to_sets
@@ -19,7 +19,7 @@ namespace :brick_owl do
     AddMissingBrickOwlUrlsToSetsJob.perform_later
   end
 
-  def get_all_set_values_from_brick_owl
-    GetAllSetValuesFromBrickOwlJob.perform_later
+  def get_all_set_values
+    BrickOwlQueueGetSetValueJobs.perform_later
   end
 end

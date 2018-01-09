@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180106041314) do
+ActiveRecord::Schema.define(version: 20180109035148) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -51,7 +51,9 @@ ActiveRecord::Schema.define(version: 20180106041314) do
     t.float "total_minifigure_value_low"
     t.float "total_minifigure_value_avg"
     t.float "total_minifigure_value_median"
+    t.boolean "most_recent", default: false, null: false
     t.index ["lego_set_id"], name: "index_brick_owl_values_on_lego_set_id"
+    t.index ["most_recent"], name: "index_brick_owl_values_on_most_recent", where: "most_recent"
   end
 
   create_table "ebay_sales", force: :cascade do |t|

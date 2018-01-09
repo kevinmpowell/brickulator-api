@@ -153,6 +153,8 @@ GEM
       redis (>= 3.3.4, < 5)
     sidekiq-failures (1.0.0)
       sidekiq (>= 4.0.0)
+    sidekiq-limit_fetch (3.4.0)
+      sidekiq (>= 4)
     simple_stats (1.1.0)
     spring (2.0.2)
       activesupport (>= 4.2)
@@ -195,6 +197,7 @@ DEPENDENCIES
   shoulda-matchers (~> 3.1)
   sidekiq
   sidekiq-failures
+  sidekiq-limit_fetch
   simple_stats
   spring
   spring-watcher-listen (~> 2.0.0)
