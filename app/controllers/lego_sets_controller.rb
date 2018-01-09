@@ -3,7 +3,8 @@ class LegoSetsController < ApplicationController
 
   # GET /lego_sets
   def index
-    lego_sets_object = LegoSet.all_sets_as_object
+    bypass_cache = index_params[:bypass_cache].nil? ? false : index_params[:bypass_cache]
+    lego_sets_object = LegoSet.all_sets_as_object(bypass_cache)
     json_response(lego_sets_object)
   end
 
@@ -15,5 +16,9 @@ class LegoSetsController < ApplicationController
   private
   def set_lego_set
     @lego_set = LegoSet.find(params[:id])
+  end
+
+  def index_params
+    params.permit(:bypass_cache)
   end
 end

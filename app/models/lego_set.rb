@@ -10,8 +10,8 @@ class LegoSet < ApplicationRecord
 
   scope :last_brick_owl_value_retrieved, -> { joins(:brick_owl_values).where(:brick_owl_values => { :most_recent => true})}
 
-  def LegoSet.all_sets_as_object
-    Rails.cache.fetch("all_sets_as_json", :expires_in => 15.minutes) do
+  def LegoSet.all_sets_as_object bypass_cache = false
+    Rails.cache.fetch("all_sets_as_json", :expires_in => 15.minutes, :force => bypass_cache) do
       @lego_sets = LegoSet.all
       @id_tagged_sets = {}
 
