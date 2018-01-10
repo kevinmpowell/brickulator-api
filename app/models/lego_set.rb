@@ -17,7 +17,7 @@ class LegoSet < ApplicationRecord
 
       @lego_sets.includes(:most_recent_brick_owl_value).where('year >= ?', 2014).order(:year, :number).each do |set|
         # ebay = set.ebay_sales.first
-        bo = set.brick_owl_values.first
+        bo = set.most_recent_brick_owl_value
         set = set.as_json
         # if !ebay.nil?
         #   set[:ebAN] = ebay.avg_sales
