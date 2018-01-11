@@ -1,4 +1,5 @@
 class LegoSetsController < ApplicationController
+  skip_before_action :authorize_request, only: [:index, :show]
   before_action :set_lego_set, only: [:show]
 
   # GET /lego_sets
