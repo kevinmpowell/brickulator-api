@@ -3,7 +3,7 @@ require 'sidekiq/web'
 
 Rails.application.routes.draw do
   post 'signup', to: 'users#create'
-  post 'auth/login', to: 'authentication#authenticate'
+  post 'auth/signin', to: 'authentication#authenticate'
 
   mount Sidekiq::Web => '/sidekiq'
 

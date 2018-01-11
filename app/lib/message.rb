@@ -20,6 +20,10 @@ class Message
     'Unauthorized request'
   end
 
+  def self.account_exists
+    'An account already exists with that email address.'
+  end
+
   def self.account_created
     'Account created successfully'
   end
