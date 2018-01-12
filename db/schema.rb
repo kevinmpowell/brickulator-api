@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180111010552) do
+ActiveRecord::Schema.define(version: 20180112005724) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -86,13 +86,23 @@ ActiveRecord::Schema.define(version: 20180111010552) do
     t.index ["number", "number_variant"], name: "index_lego_sets_on_number_and_number_variant", unique: true
   end
 
+  create_table "permissions", force: :cascade do |t|
+    t.string "name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["name"], name: "index_permissions_on_name", unique: true
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "name"
     t.string "email"
     t.string "password_digest"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "plus_member", default: false, null: false
+    t.jsonb "preferences", default: {}, null: false
     t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["plus_member"], name: "index_users_on_plus_member"
   end
 
   add_foreign_key "brick_owl_values", "lego_sets"
