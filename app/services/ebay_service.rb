@@ -16,7 +16,7 @@ class EbayService
                       SECURITY-APPNAME=#{APP_ID}&
                       RESPONSE-DATA-FORMAT=XML&
                       REST-PAYLOAD&
-                      categoryId=#{LEGO_CATEGORY_ID}&
+                      categoryId=#{LEGO_COMPLETE_SET_CATEGORY_ID}&
                       keywords=Lego+#{part_number}&
                       itemFilter(0).name=Condition&
                       itemFilter(0).value=#{condition}&
@@ -29,7 +29,8 @@ class EbayService
     puts sets.to_yaml
   end
 
-  def self.get_completed_set_values_uri set_number, condition
+  def self.get_completed_set_values_uri set_number, condition, page_number=1
+    condition = condition == "used" ? USED_CONDITION_ID : NEW_CONDITION_ID
     uri = URI.parse("http://svcs.ebay.com/services/search/FindingService/v1?
                       OPERATION-NAME=findCompletedItems&
                       SERVICE-VERSION=1.7.0&
@@ -43,7 +44,8 @@ class EbayService
                       itemFilter(1).name=SoldItemsOnly&
                       itemFilter(1).value=true&
                       sortOrder=PricePlusShippingLowest&
-                      paginationInput.entriesPerPage=100".gsub(/\s+/, ""))
+                      paginationInput.entriesPerPage=100&
+                      paginationInput.pageNumber=#{page_number}".gsub(/\s+/, ""))
   end 
 
   def self.get_values_for_set s
@@ -57,17 +59,34 @@ class EbayService
     ebay_values
   end
 
+  def self.recursively_get_completed_items_paginated_search_results set_number, condition, page_number=1
+    uri = get_completed_set_values_uri(set_number, condition, page_number)
+    response = Net::HTTP.get_response(uri)
+    search_results = Hash.from_xml(response.body)['findCompletedItemsResponse']
+    result_items = search_results['searchResult']['item']
+
+    pagination_data = search_results['paginationOutput']
+    if pagination_data['pageNumber'] < pagination_data['totalPages']
+      puts "current page: #{pagination_data['pageNumber']} of #{pagination_data['totalPages']} for set #{set_number}"
+      new_page = page_number + 1
+      result_items + recursively_get_completed_items_paginated_search_results(set_number, condition, new_page)
+    else
+      result_items
+    end
+  end
+
   def self.get_completed_listing_values_for_set set_number
     data = {}
-    used_uri = get_completed_set_values_uri(set_number, "used")
-    new_uri = get_completed_set_values_uri(set_number, "new")
 
-    puts used_uri
-    response = Net::HTTP.get_response(used_uri)
-    used_set_prices = Hash.from_xml(response.body)['findCompletedItemsResponse']['searchResult']['item'].map{ |s| s[:sellingStatus][:currentPrice] }.sort!
+    used_set_results = recursively_get_completed_items_paginated_search_results(set_number, "used")
+    # used_response = Net::HTTP.get_response(used_uri)
+    # used_set_data = Hash.from_xml(used_response.body)['findCompletedItemsResponse']['searchResult']
+    used_set_prices = used_set_results.map{ |s| s['sellingStatus']['currentPrice'].to_f }.sort
 
-    response = Net::HTTP.get_response(used_uri)
-    new_set_prices = Hash.from_xml(response.body)['findCompletedItemsResponse']['searchResult']['item'].map{ |s| s[:sellingStatus][:currentPrice] }.sort!
+    new_set_results = recursively_get_completed_items_paginated_search_results(set_number, "new")
+    # new_response = Net::HTTP.get_response(new_uri)
+    # new_set_data = Hash.from_xml(new_response.body)['findCompletedItemsResponse']['searchResult']
+    new_set_prices = new_set_results.map{ |s| s['sellingStatus']['currentPrice'].to_f }.sort
 
     unless used_set_prices.empty?
       # TODO, discard high and low end?
@@ -76,6 +95,10 @@ class EbayService
       data[:complete_set_completed_listing_used_median_price] = used_set_prices.median.round(2)
       data[:complete_set_completed_listing_used_high_price] = used_set_prices.max
       data[:complete_set_completed_listing_used_low_price] = used_set_prices.min
+      # data[:complete_set_completed_listing_used_time_on_market_low]
+      # data[:complete_set_completed_listing_used_time_on_market_high]
+      # data[:complete_set_completed_listing_used_time_on_market_avg]
+      # data[:complete_set_completed_listing_used_time_on_market_median]
     end
 
     unless new_set_prices.empty?
@@ -85,7 +108,13 @@ class EbayService
       data[:complete_set_completed_listing_new_median_price] = new_set_prices.median.round(2)
       data[:complete_set_completed_listing_new_high_price] = new_set_prices.max
       data[:complete_set_completed_listing_new_low_price] = new_set_prices.min
+      # data[:complete_set_completed_listing_new_time_on_market_low]
+      # data[:complete_set_completed_listing_new_time_on_market_high]
+      # data[:complete_set_completed_listing_new_time_on_market_avg]
+      # data[:complete_set_completed_listing_new_time_on_market_median]
     end
+
+    puts data.to_yaml
 
     data
   end
