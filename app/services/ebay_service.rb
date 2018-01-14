@@ -83,14 +83,12 @@ class EbayService
     data = {}
 
     used_set_results = recursively_get_completed_items_paginated_search_results(set_number, "used")
-    # used_response = Net::HTTP.get_response(used_uri)
-    # used_set_data = Hash.from_xml(used_response.body)['findCompletedItemsResponse']['searchResult']
     used_set_prices = used_set_results.map{ |s| s['sellingStatus']['currentPrice'].to_f }.sort
+    used_set_time_on_market = used_set_results.map{ |s| TimeDifference.between(DateTime.parse(s['listingInfo']['endTime']), DateTime.parse(s['listingInfo']['startTime'])).in_days }.sort
 
     new_set_results = recursively_get_completed_items_paginated_search_results(set_number, "new")
-    # new_response = Net::HTTP.get_response(new_uri)
-    # new_set_data = Hash.from_xml(new_response.body)['findCompletedItemsResponse']['searchResult']
     new_set_prices = new_set_results.map{ |s| s['sellingStatus']['currentPrice'].to_f }.sort
+    new_set_time_on_market = new_set_results.map{ |s| TimeDifference.between(DateTime.parse(s['listingInfo']['endTime']), DateTime.parse(s['listingInfo']['startTime'])).in_days }.sort
 
     unless used_set_prices.empty?
       # TODO, discard high and low end?
@@ -99,10 +97,10 @@ class EbayService
       data[:complete_set_completed_listing_used_median_price] = used_set_prices.median.round(2)
       data[:complete_set_completed_listing_used_high_price] = used_set_prices.max
       data[:complete_set_completed_listing_used_low_price] = used_set_prices.min
-      # data[:complete_set_completed_listing_used_time_on_market_low]
-      # data[:complete_set_completed_listing_used_time_on_market_high]
-      # data[:complete_set_completed_listing_used_time_on_market_avg]
-      # data[:complete_set_completed_listing_used_time_on_market_median]
+      data[:complete_set_completed_listing_used_time_on_market_low] = used_set_time_on_market.min
+      data[:complete_set_completed_listing_used_time_on_market_high] = used_set_time_on_market.max
+      data[:complete_set_completed_listing_used_time_on_market_avg] = used_set_time_on_market.mean.round(1)
+      data[:complete_set_completed_listing_used_time_on_market_median] = used_set_time_on_market.median.round(1)
     end
 
     unless new_set_prices.empty?
@@ -112,10 +110,10 @@ class EbayService
       data[:complete_set_completed_listing_new_median_price] = new_set_prices.median.round(2)
       data[:complete_set_completed_listing_new_high_price] = new_set_prices.max
       data[:complete_set_completed_listing_new_low_price] = new_set_prices.min
-      # data[:complete_set_completed_listing_new_time_on_market_low]
-      # data[:complete_set_completed_listing_new_time_on_market_high]
-      # data[:complete_set_completed_listing_new_time_on_market_avg]
-      # data[:complete_set_completed_listing_new_time_on_market_median]
+      data[:complete_set_completed_listing_new_time_on_market_low] = new_set_time_on_market.min
+      data[:complete_set_completed_listing_new_time_on_market_high] = new_set_time_on_market.max
+      data[:complete_set_completed_listing_new_time_on_market_avg] = new_set_time_on_market.mean.round(1)
+      data[:complete_set_completed_listing_new_time_on_market_median] = new_set_time_on_market.median.round(1)
     end
 
     data
