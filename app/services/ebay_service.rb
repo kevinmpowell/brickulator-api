@@ -45,6 +45,7 @@ class EbayService
                       itemFilter(1).value=true&
                       sortOrder=PricePlusShippingLowest&
                       paginationInput.entriesPerPage=100&
+                      sortOrder=EndTimeSoonest&
                       paginationInput.pageNumber=#{page_number}".gsub(/\s+/, ""))
   end 
 
@@ -59,19 +60,22 @@ class EbayService
     ebay_values
   end
 
-  def self.recursively_get_completed_items_paginated_search_results set_number, condition, page_number=1
+  def self.recursively_get_completed_items_paginated_search_results set_number, condition, page_number=1, sold_within=1.week.ago
     uri = get_completed_set_values_uri(set_number, condition, page_number)
     response = Net::HTTP.get_response(uri)
     search_results = Hash.from_xml(response.body)['findCompletedItemsResponse']
-    result_items = search_results['searchResult']['item']
+    result_items = search_results['searchResult']['item'].select{ |l| l['listingInfo']['endTime'] >= sold_within }
 
-    pagination_data = search_results['paginationOutput']
-    if pagination_data['pageNumber'] < pagination_data['totalPages']
-      puts "current page: #{pagination_data['pageNumber']} of #{pagination_data['totalPages']} for set #{set_number}"
-      new_page = page_number + 1
-      result_items + recursively_get_completed_items_paginated_search_results(set_number, condition, new_page)
+    if result_items.empty? || result_items.last['listingInfo']['endTime'] < sold_within
+      result_items # If the last of the results on this page is older than the sold_within range, bail out and return the items
     else
-      result_items
+      pagination_data = search_results['paginationOutput']
+      if pagination_data['pageNumber'] < pagination_data['totalPages']
+        new_page = page_number + 1
+        result_items + recursively_get_completed_items_paginated_search_results(set_number, condition, new_page)
+      else
+        result_items
+      end
     end
   end
 
@@ -113,8 +117,6 @@ class EbayService
       # data[:complete_set_completed_listing_new_time_on_market_avg]
       # data[:complete_set_completed_listing_new_time_on_market_median]
     end
-
-    puts data.to_yaml
 
     data
   end
