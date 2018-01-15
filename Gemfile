@@ -31,6 +31,7 @@ gem 'nokogiri'
 gem "simple_stats" #mean, median, & mode for arrays
 gem "lograge"
 gem 'sidekiq-limit_fetch' #limits the number of jobs fetched off a queue, see sidekiq.yml for config
+gem 'time_difference' #Date math
 
 # Use ActiveModel has_secure_password
 gem 'bcrypt', '~> 3.1.7'

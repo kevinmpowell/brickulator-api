@@ -1,5 +1,5 @@
 class LegoSet < ApplicationRecord
-  has_many :ebay_sales, dependent: :destroy
+  has_many :ebay_values, dependent: :destroy
   has_many :brick_owl_values, dependent: :destroy
 
   validates_presence_of :title, :number
@@ -7,17 +7,20 @@ class LegoSet < ApplicationRecord
 
   # Could also include and preload most-recent book this way for lists if you wanted
   has_one :most_recent_brick_owl_value, -> { where(:most_recent => true) }, :class_name => 'BrickOwlValue'
-
   scope :last_brick_owl_value_retrieved, -> { joins(:brick_owl_values).where(:brick_owl_values => { :most_recent => true})}
+  # Most recent ebay value
+  has_one :most_recent_ebay_value, -> { where(:most_recent => true) }, :class_name => 'EbayValue'
+  scope :last_ebay_value_retrieved, -> { joins(:ebay_values).where(:ebay_values => { :most_recent => true})}
 
   def LegoSet.all_sets_as_object bypass_cache = false
     Rails.cache.fetch("all_sets_as_json", :expires_in => 15.minutes, :force => bypass_cache) do
       @lego_sets = LegoSet.all
       @id_tagged_sets = {}
 
-      @lego_sets.includes(:most_recent_brick_owl_value).where('year >= ?', 2014).order(:year, :number).each do |set|
+      @lego_sets.includes(:most_recent_brick_owl_value, :most_recent_ebay_value).where('year >= ?', 2014).order(:year, :number).each do |set|
         # ebay = set.ebay_sales.first
         bo = set.most_recent_brick_owl_value
+        e = set.most_recent_ebay_value
         set = set.as_json
         # if !ebay.nil?
         #   set[:ebAN] = ebay.avg_sales
@@ -27,23 +30,46 @@ class LegoSet < ApplicationRecord
         # end
 
         if !bo.nil?
-          set[:boRA] = bo.retrieved_at
-          set[:boPOU] = bo.part_out_value_used unless bo.part_out_value_used.nil?
-          set[:boPON] = bo.part_out_value_new unless bo.part_out_value_new.nil?
-          set[:boCSNLC] = bo.complete_set_new_listings_count unless bo.complete_set_new_listings_count.nil?
-          set[:boCSNA] = bo.complete_set_new_avg_price unless bo.complete_set_new_avg_price.nil?
-          set[:boCSNM] = bo.complete_set_new_median_price unless bo.complete_set_new_median_price.nil?
-          set[:boCSNH] = bo.complete_set_new_high_price unless bo.complete_set_new_high_price.nil?
-          set[:boCSNL] = bo.complete_set_new_low_price unless bo.complete_set_new_low_price.nil?
-          set[:boCSULC] = bo.complete_set_used_listings_count unless bo.complete_set_used_listings_count.nil?
-          set[:boCSUA] = bo.complete_set_used_avg_price unless bo.complete_set_used_avg_price.nil?
-          set[:boCSUM] = bo.complete_set_used_median_price unless bo.complete_set_used_median_price.nil?
-          set[:boCSUH] = bo.complete_set_used_high_price unless bo.complete_set_used_high_price.nil?
-          set[:boCSUL] = bo.complete_set_used_low_price unless bo.complete_set_used_low_price.nil?
-          set[:boMA] = bo.total_minifigure_value_avg unless bo.total_minifigure_value_avg.nil?
-          set[:boMM] = bo.total_minifigure_value_median unless bo.total_minifigure_value_median.nil?
-          set[:boMH] = bo.total_minifigure_value_high unless bo.total_minifigure_value_high.nil?
-          set[:boML] = bo.total_minifigure_value_low unless bo.total_minifigure_value_low.nil?
+          set[:boRA]    = bo.retrieved_at
+          set[:boPOU]   = bo.part_out_value_used                unless bo.part_out_value_used.nil?
+          set[:boPON]   = bo.part_out_value_new                 unless bo.part_out_value_new.nil?
+          set[:boCSNLC] = bo.complete_set_new_listings_count    unless bo.complete_set_new_listings_count.nil?
+          set[:boCSNA]  = bo.complete_set_new_avg_price         unless bo.complete_set_new_avg_price.nil?
+          set[:boCSNM]  = bo.complete_set_new_median_price      unless bo.complete_set_new_median_price.nil?
+          set[:boCSNH]  = bo.complete_set_new_high_price        unless bo.complete_set_new_high_price.nil?
+          set[:boCSNL]  = bo.complete_set_new_low_price         unless bo.complete_set_new_low_price.nil?
+          set[:boCSULC] = bo.complete_set_used_listings_count   unless bo.complete_set_used_listings_count.nil?
+          set[:boCSUA]  = bo.complete_set_used_avg_price        unless bo.complete_set_used_avg_price.nil?
+          set[:boCSUM]  = bo.complete_set_used_median_price     unless bo.complete_set_used_median_price.nil?
+          set[:boCSUH]  = bo.complete_set_used_high_price       unless bo.complete_set_used_high_price.nil?
+          set[:boCSUL]  = bo.complete_set_used_low_price        unless bo.complete_set_used_low_price.nil?
+          set[:boMA]    = bo.total_minifigure_value_avg         unless bo.total_minifigure_value_avg.nil?
+          set[:boMM]    = bo.total_minifigure_value_median      unless bo.total_minifigure_value_median.nil?
+          set[:boMH]    = bo.total_minifigure_value_high        unless bo.total_minifigure_value_high.nil?
+          set[:boML]    = bo.total_minifigure_value_low         unless bo.total_minifigure_value_low.nil?
+        end
+
+        if !e.nil?
+          set[:eRA]        = e.retrieved_at
+          set[:eCSCLULC]   = e.complete_set_completed_listing_used_listings_count         unless e.complete_set_completed_listing_used_listings_count.nil?
+          set[:eCSCLUA]    = e.complete_set_completed_listing_used_avg_price              unless e.complete_set_completed_listing_used_avg_price.nil?
+          set[:eCSCLUM]    = e.complete_set_completed_listing_used_median_price           unless e.complete_set_completed_listing_used_median_price.nil?
+          set[:eCSCLUH]    = e.complete_set_completed_listing_used_high_price             unless e.complete_set_completed_listing_used_high_price.nil?
+          set[:eCSCLUL]    = e.complete_set_completed_listing_used_low_price              unless e.complete_set_completed_listing_used_low_price.nil?
+          set[:eCSCLUTA]   = e.complete_set_completed_listing_used_time_on_market_avg     unless e.complete_set_completed_listing_used_time_on_market_avg.nil?
+          set[:eCSCLUTM]   = e.complete_set_completed_listing_used_time_on_market_median  unless e.complete_set_completed_listing_used_time_on_market_median.nil?
+          set[:eCSCLUTH]   = e.complete_set_completed_listing_used_time_on_market_high    unless e.complete_set_completed_listing_used_time_on_market_high.nil?
+          set[:eCSCLUTL]   = e.complete_set_completed_listing_used_time_on_market_low     unless e.complete_set_completed_listing_used_time_on_market_low.nil?
+          
+          set[:eCSCLNLC]   = e.complete_set_completed_listing_new_listings_count          unless e.complete_set_completed_listing_new_listings_count.nil?
+          set[:eCSCLNA]    = e.complete_set_completed_listing_new_avg_price               unless e.complete_set_completed_listing_new_avg_price.nil?
+          set[:eCSCLNM]    = e.complete_set_completed_listing_new_median_price            unless e.complete_set_completed_listing_new_median_price.nil?
+          set[:eCSCLNH]    = e.complete_set_completed_listing_new_high_price              unless e.complete_set_completed_listing_new_high_price.nil?
+          set[:eCSCLNL]    = e.complete_set_completed_listing_new_low_price               unless e.complete_set_completed_listing_new_low_price.nil?
+          set[:eCSCLNTA]   = e.complete_set_completed_listing_new_time_on_market_avg      unless e.complete_set_completed_listing_new_time_on_market_avg.nil?
+          set[:eCSCLNTM]   = e.complete_set_completed_listing_new_time_on_market_median   unless e.complete_set_completed_listing_new_time_on_market_median.nil?
+          set[:eCSCLNTH]   = e.complete_set_completed_listing_new_time_on_market_high     unless e.complete_set_completed_listing_new_time_on_market_high.nil?
+          set[:eCSCLNTL]   = e.complete_set_completed_listing_new_time_on_market_low      unless e.complete_set_completed_listing_new_time_on_market_low.nil?
         end
 
         set[:t] = set['title']
