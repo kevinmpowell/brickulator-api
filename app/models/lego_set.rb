@@ -1,5 +1,5 @@
 class LegoSet < ApplicationRecord
-  has_many :ebay_sales, dependent: :destroy
+  has_many :ebay_values, dependent: :destroy
   has_many :brick_owl_values, dependent: :destroy
 
   validates_presence_of :title, :number
@@ -7,8 +7,10 @@ class LegoSet < ApplicationRecord
 
   # Could also include and preload most-recent book this way for lists if you wanted
   has_one :most_recent_brick_owl_value, -> { where(:most_recent => true) }, :class_name => 'BrickOwlValue'
-
   scope :last_brick_owl_value_retrieved, -> { joins(:brick_owl_values).where(:brick_owl_values => { :most_recent => true})}
+  # Most recent ebay value
+  has_one :most_recent_ebay_value, -> { where(:most_recent => true) }, :class_name => 'EbayValue'
+  scope :last_ebay_value_retrieved, -> { joins(:ebay_values).where(:ebay_values => { :most_recent => true})}
 
   def LegoSet.all_sets_as_object bypass_cache = false
     Rails.cache.fetch("all_sets_as_json", :expires_in => 15.minutes, :force => bypass_cache) do
