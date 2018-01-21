@@ -35,20 +35,29 @@ class BricklinkService
     used_set_sold_data = BricklinkService.get_complete_set_last_six_months_sales_used_values(set_listings)
     bricklink_values = bricklink_values.merge(used_set_sold_data)
 
+    used_part_out_data = BricklinkService.get_part_out_values(s, "used")
+    bricklink_values = bricklink_values.merge(used_part_out_data)
+    
+    new_part_out_data = BricklinkService.get_part_out_values(s, "new")
+    bricklink_values = bricklink_values.merge(new_part_out_data)
 
-    puts bricklink_values.to_yaml
     bricklink_values
   end
 
   def self.get_part_out_values s, condition="new", minifigs="whole", include_instructions=true, include_box=true, include_extra_parts=true
-    condition = condition == "new" ? "N" : "U"
+    data = {}
+    condition_query_param = condition == "new" ? "N" : "U"
     minifigs = minifigs == "whole" ? "M" : "P"
-    include_instructions ? "Y" : "N"
+    include_instructions = include_instructions ? "Y" : "N"
     include_box = include_box ? "Y" : "N"
     include_extra_parts = include_extra_parts ? "Y" : "N"
 
-    url = "#{BASE_PART_OUT_URL}#{s.number}&itemType=S&itemSeq=#{s.number_variant}&itemQty=1&breakType=#{minifigs}&itemCondition=#{condition}&incInstr=#{include_instructions}&incBox=#{include_box}&incParts=#{include_extra_parts}"
-    puts url
+    url = "#{BASE_PART_OUT_URL}#{s.number}&itemSeq=#{s.number_variant}&itemQty=1&breakType=#{minifigs}&itemCondition=#{condition_query_param}&incInstr=#{include_instructions}&incBox=#{include_box}&incParts=#{include_extra_parts}"
+    doc = Nokogiri::HTML(open(url))
+    sales_row = doc.css("#id-main-legacy-table table tr:nth-child(3)")
+    data["part_out_value_last_six_months_#{condition}"] = BricklinkService.c_to_f(sales_row.css("td:first-child font[size='3'] b").text)
+    data["part_out_value_current_#{condition}"] = BricklinkService.c_to_f(sales_row.css("td:last-child font[size='3'] b").text)
+    data
   end
 
   def self.get_complete_set_new_values set_listings
