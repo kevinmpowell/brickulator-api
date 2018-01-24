@@ -1,6 +1,7 @@
 class LegoSet < ApplicationRecord
   has_many :ebay_values, dependent: :destroy
   has_many :brick_owl_values, dependent: :destroy
+  has_many :bricklink_values, dependent: :destroy
 
   validates_presence_of :title, :number
   validates_uniqueness_of :number, scope: :number_variant
@@ -11,16 +12,20 @@ class LegoSet < ApplicationRecord
   # Most recent ebay value
   has_one :most_recent_ebay_value, -> { where(:most_recent => true) }, :class_name => 'EbayValue'
   scope :last_ebay_value_retrieved, -> { joins(:ebay_values).where(:ebay_values => { :most_recent => true})}
+  # Most recent bricklink value
+  has_one :most_recent_bricklink_value, -> { where(:most_recent => true) }, :class_name => 'BricklinkValue'
+  scope :last_bricklink_value_retrieved, -> { joins(:bricklink_values).where(:bricklink_values => { :most_recent => true})}
 
   def LegoSet.all_sets_as_object bypass_cache = false
     Rails.cache.fetch("all_sets_as_json", :expires_in => 15.minutes, :force => bypass_cache) do
       @lego_sets = LegoSet.all
       @id_tagged_sets = {}
 
-      @lego_sets.includes(:most_recent_brick_owl_value, :most_recent_ebay_value).where('year >= ?', 2014).order(:year, :number).each do |set|
+      @lego_sets.includes(:most_recent_brick_owl_value, :most_recent_ebay_value, :most_recent_bricklink_value).where('year >= ?', 2014).order(:year, :number).each do |set|
         # ebay = set.ebay_sales.first
         bo = set.most_recent_brick_owl_value
         e = set.most_recent_ebay_value
+        bl = set.most_recent_bricklink_value
         set = set.as_json
         # if !ebay.nil?
         #   set[:ebAN] = ebay.avg_sales

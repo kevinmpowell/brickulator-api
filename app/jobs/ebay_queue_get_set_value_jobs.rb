@@ -1,5 +1,5 @@
 class EbayQueueGetSetValueJobs < ActiveJob::Base
-  queue_as :default
+  queue_as :ebay
 
   def perform
     ebay_queue_get_set_value_jobs
