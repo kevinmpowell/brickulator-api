@@ -38,16 +38,19 @@ class LegoSet < ApplicationRecord
           set[:boRA]    = bo.retrieved_at
           set[:boPOU]   = bo.part_out_value_used                unless bo.part_out_value_used.nil?
           set[:boPON]   = bo.part_out_value_new                 unless bo.part_out_value_new.nil?
+          
           set[:boCSNLC] = bo.complete_set_new_listings_count    unless bo.complete_set_new_listings_count.nil?
           set[:boCSNA]  = bo.complete_set_new_avg_price         unless bo.complete_set_new_avg_price.nil?
           set[:boCSNM]  = bo.complete_set_new_median_price      unless bo.complete_set_new_median_price.nil?
           set[:boCSNH]  = bo.complete_set_new_high_price        unless bo.complete_set_new_high_price.nil?
           set[:boCSNL]  = bo.complete_set_new_low_price         unless bo.complete_set_new_low_price.nil?
+          
           set[:boCSULC] = bo.complete_set_used_listings_count   unless bo.complete_set_used_listings_count.nil?
           set[:boCSUA]  = bo.complete_set_used_avg_price        unless bo.complete_set_used_avg_price.nil?
           set[:boCSUM]  = bo.complete_set_used_median_price     unless bo.complete_set_used_median_price.nil?
           set[:boCSUH]  = bo.complete_set_used_high_price       unless bo.complete_set_used_high_price.nil?
           set[:boCSUL]  = bo.complete_set_used_low_price        unless bo.complete_set_used_low_price.nil?
+          
           set[:boMA]    = bo.total_minifigure_value_avg         unless bo.total_minifigure_value_avg.nil?
           set[:boMM]    = bo.total_minifigure_value_median      unless bo.total_minifigure_value_median.nil?
           set[:boMH]    = bo.total_minifigure_value_high        unless bo.total_minifigure_value_high.nil?
@@ -75,6 +78,33 @@ class LegoSet < ApplicationRecord
           set[:eCSCLNTM]   = e.complete_set_completed_listing_new_time_on_market_median   unless e.complete_set_completed_listing_new_time_on_market_median.nil?
           set[:eCSCLNTH]   = e.complete_set_completed_listing_new_time_on_market_high     unless e.complete_set_completed_listing_new_time_on_market_high.nil?
           set[:eCSCLNTL]   = e.complete_set_completed_listing_new_time_on_market_low      unless e.complete_set_completed_listing_new_time_on_market_low.nil?
+        end
+
+        if !bl.nil?
+          set[:blRA]        = bl.retrieved_at
+          set[:blCSNLC]     = bl.complete_set_new_listings_count                             unless bl.complete_set_new_listings_count.nil?
+          set[:blCSNA]      = bl.complete_set_new_avg_price                                  unless bl.complete_set_new_avg_price.nil?
+          set[:blCSNM]      = bl.complete_set_new_median_price                               unless bl.complete_set_new_median_price.nil?
+          set[:blCSNH]      = bl.complete_set_new_high_price                                 unless bl.complete_set_new_high_price.nil?
+          set[:blCSNL]      = bl.complete_set_new_low_price                                  unless bl.complete_set_new_low_price.nil?
+
+          set[:blCSULC]     = bl.complete_set_used_listings_count                            unless bl.complete_set_used_listings_count.nil?
+          set[:blCSUA]      = bl.complete_set_used_avg_price                                 unless bl.complete_set_used_avg_price.nil?
+          set[:blCSUM]      = bl.complete_set_used_median_price                              unless bl.complete_set_used_median_price.nil?
+          set[:blCSUH]      = bl.complete_set_used_high_price                                unless bl.complete_set_used_high_price.nil?
+          set[:blCSUL]      = bl.complete_set_used_low_price                                 unless bl.complete_set_used_low_price.nil?
+
+          set[:blCSCLULC]   = bl.complete_set_completed_listing_used_listings_count         unless bl.complete_set_completed_listing_used_listings_count.nil?
+          set[:blCSCLUA]    = bl.complete_set_completed_listing_used_avg_price              unless bl.complete_set_completed_listing_used_avg_price.nil?
+          set[:blCSCLUM]    = bl.complete_set_completed_listing_used_median_price           unless bl.complete_set_completed_listing_used_median_price.nil?
+          set[:blCSCLUH]    = bl.complete_set_completed_listing_used_high_price             unless bl.complete_set_completed_listing_used_high_price.nil?
+          set[:blCSCLUL]    = bl.complete_set_completed_listing_used_low_price              unless bl.complete_set_completed_listing_used_low_price.nil?
+         
+          set[:blCSCLNLC]   = bl.complete_set_completed_listing_new_listings_count          unless bl.complete_set_completed_listing_new_listings_count.nil?
+          set[:blCSCLNA]    = bl.complete_set_completed_listing_new_avg_price               unless bl.complete_set_completed_listing_new_avg_price.nil?
+          set[:blCSCLNM]    = bl.complete_set_completed_listing_new_median_price            unless bl.complete_set_completed_listing_new_median_price.nil?
+          set[:blCSCLNH]    = bl.complete_set_completed_listing_new_high_price              unless bl.complete_set_completed_listing_new_high_price.nil?
+          set[:blCSCLNL]    = bl.complete_set_completed_listing_new_low_price               unless bl.complete_set_completed_listing_new_low_price.nil?
         end
 
         set[:t] = set['title']
