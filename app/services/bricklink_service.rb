@@ -127,7 +127,7 @@ class BricklinkService
     uri = URI.parse("#{url}&Authorization=#{ o.auth_values_as_query_string(parsed_url) }")
     # puts uri.to_s
     response = Net::HTTP.get_response(uri)
-    print response.read_body
+    # print response.read_body
 
     # Net::HTTP.start( parsed_url.host ) { | http |
     #   # o.sign(parsed_url).query_string
@@ -171,12 +171,17 @@ class BricklinkService
 
     # testable_url = url + '?' + parameters + '&oauth_signature=' + oauth_signature
     # p testable_url
-    JSON.parse(response.body)["data"]
+    set_listings = JSON.parse(response.body)["data"]
+    if set_listings.nil?
+      nil
+    else
+      set_listings["price_detail"] 
+    end
   end
 
 
   def self.get_values_for_set s
-    set_number = "#{s.number}-#{s.number_variant}"
+    set_number = "#{s.number.strip}-#{s.number_variant.strip}"
     bricklink_values = {}
     # url = "#{BASE_URL}#{set_number}"
     # puts url
@@ -187,16 +192,18 @@ class BricklinkService
     new_set_data = BricklinkService.get_complete_set_new_values(set_number)
     bricklink_values = bricklink_values.merge(new_set_data)
     # USED Complete Sets
+    used_set_data = BricklinkService.get_complete_set_used_values(set_number)
+    bricklink_values = bricklink_values.merge(used_set_data)
     # used_set_data = BricklinkService.get_set_listings("used", "stock")
     # bricklink_values = bricklink_values.merge(used_set_data)
 
     # NEW Last 6 months sold
-    # new_set_sold_data = BricklinkService.get_set_listings("new", "sold")
-    # bricklink_values = bricklink_values.merge(new_set_sold_data)
+    new_set_sold_data = BricklinkService.get_complete_set_last_six_months_sales_new_values(set_number)
+    bricklink_values = bricklink_values.merge(new_set_sold_data)
 
     # USED Last 6 months sold
-    # used_set_sold_data = BricklinkService.get_set_listings("used", "sold")
-    # bricklink_values = bricklink_values.merge(used_set_sold_data)
+    used_set_sold_data = BricklinkService.get_complete_set_last_six_months_sales_used_values(set_number)
+    bricklink_values = bricklink_values.merge(used_set_sold_data)
 
     # used_part_out_data = BricklinkService.get_part_out_values(s, "used")
     # bricklink_values = bricklink_values.merge(used_part_out_data)
@@ -226,8 +233,8 @@ class BricklinkService
   def self.get_complete_set_new_values set_number
     data = {}
     new_set_prices = []
-    current_new_listings = BricklinkService.get_set_listings(set_number, "new", "stock")["price_detail"]
-    unless current_new_listings.empty?
+    current_new_listings = BricklinkService.get_set_listings(set_number, "new", "stock")
+    unless current_new_listings.nil? || current_new_listings.empty?
       current_new_listings.each do |l|
         price = BricklinkService.c_to_f(l["unit_price"])
         l["quantity"].times do 
@@ -248,36 +255,80 @@ class BricklinkService
     data
   end
 
-  # def self.get_complete_set_last_six_months_sales_new_values set_listings
-  #   data = {}
-  #   sold_new_listing_tables = set_listings.css("td:nth-child(1) table")
-  #   new_set_sold_prices = []
+  def self.get_complete_set_used_values set_number
+    data = {}
+    used_set_prices = []
+    current_used_listings = BricklinkService.get_set_listings(set_number, "used", "stock")
+    unless current_used_listings.nil? || current_used_listings.empty?
+      current_used_listings.each do |l|
+        price = BricklinkService.c_to_f(l["unit_price"])
+        l["quantity"].times do 
+          used_set_prices << price
+        end
+      end
+    end
+    # used_set_prices
+    if used_set_prices.empty?
+      data[:complete_set_used_listings_count] = 0
+    else
+      data[:complete_set_used_listings_count] = used_set_prices.count
+      data[:complete_set_used_avg_price] = used_set_prices.mean.round(2)
+      data[:complete_set_used_median_price] = used_set_prices.median.round(2)
+      data[:complete_set_used_high_price] = used_set_prices.max
+      data[:complete_set_used_low_price] = used_set_prices.min
+    end
+    data
+  end
 
-  #   sold_new_listing_tables.each do |table|
-  #     first_cell = table.css("td:first-child").first
-  #     next if (!first_cell.attribute("colspan").nil? && first_cell.attribute("colspan").value.to_i == 3) || table.attribute("cellpadding").value.to_i == 0
-  #     sold_listing_rows = table.css("table tr")
-  #     sold_listing_rows.drop(1).each do |r|
-  #       first_column = r.css("td:first-child")
-  #       break if !first_column.attribute("colspan").nil? && first_column.attribute("colspan").value.to_i == 3        
-  #       qty = r.css("td:nth-child(2)").text.to_i
-  #       value = BricklinkService.c_to_f(r.css("td:last-child").text)
-  #       qty.times do 
-  #         new_set_sold_prices << value
-  #       end
-  #     end
-  #   end
+  def self.get_complete_set_last_six_months_sales_new_values set_number
+    data = {}
+    new_set_prices = []
+    current_new_listings = BricklinkService.get_set_listings(set_number, "new", "sold")
+    unless current_new_listings.nil? || current_new_listings.empty?
+      current_new_listings.each do |l|
+        price = BricklinkService.c_to_f(l["unit_price"])
+        l["quantity"].times do 
+          new_set_prices << price
+        end
+      end
+    end
+    # new_set_prices
+    if new_set_prices.empty?
+      data[:complete_set_completed_listing_new_listings_count] = 0
+    else
+      data[:complete_set_completed_listing_new_listings_count] = new_set_prices.count
+      data[:complete_set_completed_listing_new_avg_price] = new_set_prices.mean.round(2)
+      data[:complete_set_completed_listing_new_median_price] = new_set_prices.median.round(2)
+      data[:complete_set_completed_listing_new_high_price] = new_set_prices.max
+      data[:complete_set_completed_listing_new_low_price] = new_set_prices.min
+    end
+    data
+  end
 
-  #   data[:complete_set_completed_listing_new_listings_count] = 0
-  #   unless new_set_sold_prices.empty?
-  #     data[:complete_set_completed_listing_new_listings_count] = new_set_sold_prices.count
-  #     data[:complete_set_completed_listing_new_avg_price] = new_set_sold_prices.mean.round(2)
-  #     data[:complete_set_completed_listing_new_median_price] = new_set_sold_prices.median.round(2)
-  #     data[:complete_set_completed_listing_new_high_price] = new_set_sold_prices.max
-  #     data[:complete_set_completed_listing_new_low_price] = new_set_sold_prices.min
-  #   end
-  #   data
-  # end
+  def self.get_complete_set_last_six_months_sales_used_values set_number
+    data = {}
+    used_set_prices = []
+    current_used_listings = BricklinkService.get_set_listings(set_number, "used", "sold")
+    unless current_used_listings.nil? || current_used_listings.empty?
+      current_used_listings.each do |l|
+        price = BricklinkService.c_to_f(l["unit_price"])
+        l["quantity"].times do 
+          used_set_prices << price
+        end
+      end
+    end
+    # used_set_prices
+    if used_set_prices.empty?
+      data[:complete_set_completed_listing_used_listings_count] = 0
+    else
+      data[:complete_set_completed_listing_used_listings_count] = used_set_prices.count
+      data[:complete_set_completed_listing_used_avg_price] = used_set_prices.mean.round(2)
+      data[:complete_set_completed_listing_used_median_price] = used_set_prices.median.round(2)
+      data[:complete_set_completed_listing_used_high_price] = used_set_prices.max
+      data[:complete_set_completed_listing_used_low_price] = used_set_prices.min
+    end
+    data
+  end
 
   # def self.get_complete_set_last_six_months_sales_used_values set_listings
   #   data = {}
