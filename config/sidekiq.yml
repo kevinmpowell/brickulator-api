@@ -8,6 +8,7 @@ production:
   - priority
   - brick_owl
   - ebay
+  - bricklink
   - default
 :limits:
   brick_owl: 2

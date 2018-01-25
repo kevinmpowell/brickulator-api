@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180114235900) do
+ActiveRecord::Schema.define(version: 20180121003824) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -54,6 +54,40 @@ ActiveRecord::Schema.define(version: 20180114235900) do
     t.boolean "most_recent", default: false, null: false
     t.index ["lego_set_id"], name: "index_brick_owl_values_on_lego_set_id"
     t.index ["most_recent"], name: "index_brick_owl_values_on_most_recent", where: "most_recent"
+  end
+
+  create_table "bricklink_values", force: :cascade do |t|
+    t.datetime "retrieved_at"
+    t.integer "complete_set_new_listings_count"
+    t.float "complete_set_new_avg_price"
+    t.float "complete_set_new_median_price"
+    t.float "complete_set_new_high_price"
+    t.float "complete_set_new_low_price"
+    t.integer "complete_set_used_listings_count"
+    t.float "complete_set_used_avg_price"
+    t.float "complete_set_used_median_price"
+    t.float "complete_set_used_high_price"
+    t.float "complete_set_used_low_price"
+    t.integer "complete_set_completed_listing_new_listings_count"
+    t.float "complete_set_completed_listing_new_avg_price"
+    t.float "complete_set_completed_listing_new_median_price"
+    t.float "complete_set_completed_listing_new_high_price"
+    t.float "complete_set_completed_listing_new_low_price"
+    t.integer "complete_set_completed_listing_used_listings_count"
+    t.float "complete_set_completed_listing_used_avg_price"
+    t.float "complete_set_completed_listing_used_median_price"
+    t.float "complete_set_completed_listing_used_high_price"
+    t.float "complete_set_completed_listing_used_low_price"
+    t.float "part_out_value_last_six_months_used"
+    t.float "part_out_value_last_six_months_new"
+    t.float "part_out_value_current_used"
+    t.float "part_out_value_current_new"
+    t.boolean "most_recent", default: false, null: false
+    t.bigint "lego_set_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["lego_set_id"], name: "index_bricklink_values_on_lego_set_id"
+    t.index ["most_recent"], name: "index_bricklink_values_on_most_recent", where: "most_recent"
   end
 
   create_table "ebay_values", force: :cascade do |t|
@@ -122,5 +156,6 @@ ActiveRecord::Schema.define(version: 20180114235900) do
   end
 
   add_foreign_key "brick_owl_values", "lego_sets"
+  add_foreign_key "bricklink_values", "lego_sets"
   add_foreign_key "ebay_values", "lego_sets"
 end
