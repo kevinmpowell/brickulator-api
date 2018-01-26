@@ -36,6 +36,7 @@ gem 'time_difference' #Date math
 # Use ActiveModel has_secure_password
 gem 'bcrypt', '~> 3.1.7'
 gem 'jwt'
+gem 'gibbon'
 
 group :test do
   gem 'factory_bot_rails'
