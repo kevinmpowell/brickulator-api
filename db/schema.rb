@@ -136,13 +136,6 @@ ActiveRecord::Schema.define(version: 20180121003824) do
     t.index ["number", "number_variant"], name: "index_lego_sets_on_number_and_number_variant", unique: true
   end
 
-  create_table "permissions", force: :cascade do |t|
-    t.string "name"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["name"], name: "index_permissions_on_name", unique: true
-  end
-
   create_table "users", force: :cascade do |t|
     t.string "name"
     t.string "email"
