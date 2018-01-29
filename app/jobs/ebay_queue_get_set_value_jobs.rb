@@ -6,7 +6,7 @@ class EbayQueueGetSetValueJobs < ActiveJob::Base
   end
 
   def ebay_queue_get_set_value_jobs
-    ls = LegoSet.select(:id).where('year >= ?', 2013).order({year: "desc", number: "asc", number_variant: "asc"})
+    ls = LegoSet.select(:id).where('year >= ?', 2013).order({year: "desc", number: "asc", number_variant: "asc"}).limit(2000)
     
     ls.each do |s|
       EbayGetSetValueJob.perform_later(s.id)
