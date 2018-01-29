@@ -63,7 +63,7 @@ class EbayService
     ebay_values
   end
 
-  def self.recursively_get_completed_items_paginated_search_results set_number, page_number=1, sold_within=30.days.ago
+  def self.recursively_get_completed_items_paginated_search_results set_number, page_number=1, sold_within=3.months.ago
     result_items = []
     uri = get_completed_set_values_uri(set_number, page_number)
     response = Net::HTTP.get_response(uri)
