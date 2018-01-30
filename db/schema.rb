@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180121003824) do
+ActiveRecord::Schema.define(version: 20180130013424) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -52,6 +52,16 @@ ActiveRecord::Schema.define(version: 20180121003824) do
     t.float "total_minifigure_value_avg"
     t.float "total_minifigure_value_median"
     t.boolean "most_recent", default: false, null: false
+    t.integer "complete_set_completed_listing_new_listings_count"
+    t.float "complete_set_completed_listing_new_avg_price"
+    t.float "complete_set_completed_listing_new_median_price"
+    t.float "complete_set_completed_listing_new_high_price"
+    t.float "complete_set_completed_listing_new_low_price"
+    t.integer "complete_set_completed_listing_used_listings_count"
+    t.float "complete_set_completed_listing_used_avg_price"
+    t.float "complete_set_completed_listing_used_median_price"
+    t.float "complete_set_completed_listing_used_high_price"
+    t.float "complete_set_completed_listing_used_low_price"
     t.index ["lego_set_id"], name: "index_brick_owl_values_on_lego_set_id"
     t.index ["most_recent"], name: "index_brick_owl_values_on_most_recent", where: "most_recent"
   end
@@ -133,6 +143,7 @@ ActiveRecord::Schema.define(version: 20180121003824) do
     t.boolean "released"
     t.string "packaging_type"
     t.integer "instructions_count"
+    t.string "brick_owl_item_id"
     t.index ["number", "number_variant"], name: "index_lego_sets_on_number_and_number_variant", unique: true
   end
 

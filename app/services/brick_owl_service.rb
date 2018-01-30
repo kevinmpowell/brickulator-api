@@ -1,13 +1,16 @@
 # app/lib/brick_owl_service.rb
 require 'nokogiri'
 require 'open-uri'
+require 'net/http'
 
 class BrickOwlService
   BRICK_OWL_BASE_URL = "https://www.brickowl.com"
   SET_CATALOG_ROOT_URL = "#{BRICK_OWL_BASE_URL}/catalog/lego-sets"
   QUERY_URL = "#{BRICK_OWL_BASE_URL}/search/catalog?query="
   INVENTORY_PAGE_URL_SUFFIX = "/inventory?display=table"
+  ITEM_ID_REGEX = /"item_id":"([0-9]*)/
   SET_NUMBER_URL_REGEX = /-((?:sdcc)*\d+)(?:-(\d+))*$/
+  PRICE_HISTORY_AJAX_URL = "#{BRICK_OWL_BASE_URL}/ajax/price/"
 
   def self.c_to_f string
     # Currency string to float
@@ -52,7 +55,69 @@ class BrickOwlService
       brick_owl_values = brick_owl_values.merge(sticker_data)
     end
 
+    # Price history Values
+    price_history_data = get_price_history_data(s, doc)
+    brick_owl_values = brick_owl_values.merge(price_history_data)
+
     brick_owl_values
+  end
+
+  def self.set_brick_owl_item_id_for_set(s, doc)
+    brick_owl_item_id_script = doc.css("script:contains('Drupal.settings')")
+    unless brick_owl_item_id_script.nil?
+      matches = brick_owl_item_id_script.text.scan(BrickOwlService::ITEM_ID_REGEX)
+      unless matches.empty?
+        s.update_attributes({ brick_owl_item_id: matches.flatten!.first })
+      end
+    end
+  end
+
+  def self.get_price_history_data(s, doc)
+    data = {}
+    price_history_table = nil
+    if s.brick_owl_item_id.nil? # If there's no brick_owl_item_id on the LegoSet, try to find it and set it
+      BrickOwlService.set_brick_owl_item_id_for_set(s, doc)
+    end
+
+    unless s.brick_owl_item_id.nil? # If there's STILL, no brick_owl_item_id on the LegoSet, then skip this, can't get the values
+      price_history_url = "#{PRICE_HISTORY_AJAX_URL}#{s.brick_owl_item_id}"
+      uri = URI.parse(price_history_url)
+      response = Net::HTTP.get_response(uri)
+
+      price_history_object = JSON.parse(response.body)
+      price_history_object.each do |node|
+        if node['method'] == 'html'
+          price_history_table = node['data']
+        end
+      end
+
+      if !price_history_table.nil?
+        table = Nokogiri::HTML(price_history_table)
+        six_month_data_row = table.css("tbody tr:nth-child(2)")
+        new_set_data = six_month_data_row.css("td:nth-child(3)")
+        used_set_data = six_month_data_row.css("td:nth-child(4)")
+
+        if new_set_data.css("div").count > 1
+          data[:complete_set_completed_listing_new_listings_count] = new_set_data.css("div:nth-child(2) .label").text.to_i
+          data[:complete_set_completed_listing_new_avg_price] = BrickOwlService.c_to_f(new_set_data.css("div:nth-child(4) .price").text)
+          data[:complete_set_completed_listing_new_high_price] = BrickOwlService.c_to_f(new_set_data.css("div:nth-child(5) .price").text)
+          data[:complete_set_completed_listing_new_low_price] = BrickOwlService.c_to_f(new_set_data.css("div:nth-child(6) .price").text)
+        else
+          data[:complete_set_completed_listing_new_listings_count] = 0
+        end
+
+        if used_set_data.css("div").count > 1
+          data[:complete_set_completed_listing_used_listings_count] = used_set_data.css("div:nth-child(2) .label").text.to_i
+          data[:complete_set_completed_listing_used_avg_price] = BrickOwlService.c_to_f(used_set_data.css("div:nth-child(4) .price").text)
+          data[:complete_set_completed_listing_used_high_price] = BrickOwlService.c_to_f(used_set_data.css("div:nth-child(5) .price").text)
+          data[:complete_set_completed_listing_used_low_price] = BrickOwlService.c_to_f(used_set_data.css("div:nth-child(6) .price").text)
+        else
+          data[:complete_set_completed_listing_used_listings_count] = 0
+        end
+      end
+    end
+
+    data
   end
 
   def self.get_sticker_data sticker_url
