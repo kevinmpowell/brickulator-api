@@ -95,8 +95,8 @@ class EbayService
 
     # TODO: To reduce API calls - query without condition specified, get used & new results mixed and filter out the results when returned
     all_set_results = recursively_get_completed_items_paginated_search_results(set_number)
-    used_set_results = all_set_results.select{ |l| l['condition']['conditionId'].to_i == USED_CONDITION_ID }
-    new_set_results = all_set_results.select{ |l| l['condition']['conditionId'].to_i == NEW_CONDITION_ID }
+    used_set_results = all_set_results.select{ |l| !l['condition'].nil? && l['condition']['conditionId'].to_i == USED_CONDITION_ID }
+    new_set_results = all_set_results.select{ |l| !l['condition'].nil? && l['condition']['conditionId'].to_i == NEW_CONDITION_ID }
 
     used_set_prices = used_set_results.map{ |s| s['sellingStatus']['currentPrice'].to_f }.sort
     used_set_time_on_market = used_set_results.map{ |s| TimeDifference.between(DateTime.parse(s['listingInfo']['endTime']), DateTime.parse(s['listingInfo']['startTime'])).in_days }.sort
