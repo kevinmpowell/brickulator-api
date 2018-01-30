@@ -16,6 +16,17 @@ class LegoSet < ApplicationRecord
   has_one :most_recent_bricklink_value, -> { where(:most_recent => true) }, :class_name => 'BricklinkValue'
   scope :last_bricklink_value_retrieved, -> { joins(:bricklink_values).where(:bricklink_values => { :most_recent => true})}
 
+
+  after_save :set_has_variants
+
+  def set_has_variants
+    sets = LegoSet.where({number: number})
+    variants = sets.find_all{ |s| s.id != id }
+    if !variants.empty? || number_variant.to_i > 1
+      sets.update_all( {has_variants: true} )
+    end
+  end
+
   def LegoSet.all_sets_as_object bypass_cache = false
     Rails.cache.fetch("all_sets_as_json", :expires_in => 15.minutes, :force => bypass_cache) do
       @lego_sets = LegoSet.all
@@ -50,6 +61,16 @@ class LegoSet < ApplicationRecord
           set[:boCSUM]  = bo.complete_set_used_median_price     unless bo.complete_set_used_median_price.nil?
           set[:boCSUH]  = bo.complete_set_used_high_price       unless bo.complete_set_used_high_price.nil?
           set[:boCSUL]  = bo.complete_set_used_low_price        unless bo.complete_set_used_low_price.nil?
+
+          set[:boCSCLULC]   = bo.complete_set_completed_listing_used_listings_count         unless bo.complete_set_completed_listing_used_listings_count.nil?
+          set[:boCSCLUA]    = bo.complete_set_completed_listing_used_avg_price              unless bo.complete_set_completed_listing_used_avg_price.nil?
+          set[:boCSCLUH]    = bo.complete_set_completed_listing_used_high_price             unless bo.complete_set_completed_listing_used_high_price.nil?
+          set[:boCSCLUL]    = bo.complete_set_completed_listing_used_low_price              unless bo.complete_set_completed_listing_used_low_price.nil?
+          
+          set[:boCSCLNLC]   = bo.complete_set_completed_listing_new_listings_count          unless bo.complete_set_completed_listing_new_listings_count.nil?
+          set[:boCSCLNA]    = bo.complete_set_completed_listing_new_avg_price               unless bo.complete_set_completed_listing_new_avg_price.nil?
+          set[:boCSCLNH]    = bo.complete_set_completed_listing_new_high_price              unless bo.complete_set_completed_listing_new_high_price.nil?
+          set[:boCSCLNL]    = bo.complete_set_completed_listing_new_low_price               unless bo.complete_set_completed_listing_new_low_price.nil?
           
           # set[:boMA]    = bo.total_minifigure_value_avg         unless bo.total_minifigure_value_avg.nil?
           # set[:boMM]    = bo.total_minifigure_value_median      unless bo.total_minifigure_value_median.nil?
@@ -64,6 +85,12 @@ class LegoSet < ApplicationRecord
           set[:eCSCLUM]    = e.complete_set_completed_listing_used_median_price           unless e.complete_set_completed_listing_used_median_price.nil?
           set[:eCSCLUH]    = e.complete_set_completed_listing_used_high_price             unless e.complete_set_completed_listing_used_high_price.nil?
           set[:eCSCLUL]    = e.complete_set_completed_listing_used_low_price              unless e.complete_set_completed_listing_used_low_price.nil?
+
+          set[:eCSULC]     = e.complete_set_used_listings_count                           unless e.complete_set_used_listings_count.nil?
+          set[:eCSUA]      = e.complete_set_used_avg_price                                unless e.complete_set_used_avg_price.nil?
+          set[:eCSUM]      = e.complete_set_used_median_price                             unless e.complete_set_used_median_price.nil?
+          set[:eCSUH]      = e.complete_set_used_high_price                               unless e.complete_set_used_high_price.nil?
+          set[:eCSUL]      = e.complete_set_used_low_price                                unless e.complete_set_used_low_price.nil?
           # set[:eCSCLUTA]   = e.complete_set_completed_listing_used_time_on_market_avg     unless e.complete_set_completed_listing_used_time_on_market_avg.nil?
           # set[:eCSCLUTM]   = e.complete_set_completed_listing_used_time_on_market_median  unless e.complete_set_completed_listing_used_time_on_market_median.nil?
           # set[:eCSCLUTH]   = e.complete_set_completed_listing_used_time_on_market_high    unless e.complete_set_completed_listing_used_time_on_market_high.nil?
@@ -74,6 +101,12 @@ class LegoSet < ApplicationRecord
           set[:eCSCLNM]    = e.complete_set_completed_listing_new_median_price            unless e.complete_set_completed_listing_new_median_price.nil?
           set[:eCSCLNH]    = e.complete_set_completed_listing_new_high_price              unless e.complete_set_completed_listing_new_high_price.nil?
           set[:eCSCLNL]    = e.complete_set_completed_listing_new_low_price               unless e.complete_set_completed_listing_new_low_price.nil?
+
+          set[:eCSNLC]     = e.complete_set_new_listings_count                            unless e.complete_set_new_listings_count.nil?
+          set[:eCSNA]      = e.complete_set_new_avg_price                                 unless e.complete_set_new_avg_price.nil?
+          set[:eCSNM]      = e.complete_set_new_median_price                              unless e.complete_set_new_median_price.nil?
+          set[:eCSNH]      = e.complete_set_new_high_price                                unless e.complete_set_new_high_price.nil?
+          set[:eCSNL]      = e.complete_set_new_low_price                                 unless e.complete_set_new_low_price.nil?
           # set[:eCSCLNTA]   = e.complete_set_completed_listing_new_time_on_market_avg      unless e.complete_set_completed_listing_new_time_on_market_avg.nil?
           # set[:eCSCLNTM]   = e.complete_set_completed_listing_new_time_on_market_median   unless e.complete_set_completed_listing_new_time_on_market_median.nil?
           # set[:eCSCLNTH]   = e.complete_set_completed_listing_new_time_on_market_high     unless e.complete_set_completed_listing_new_time_on_market_high.nil?
@@ -128,7 +161,7 @@ class LegoSet < ApplicationRecord
         set.delete("packaging_type")
         set.delete("instructions_count")
         set_key = set[:n]
-        if !set[:nv].nil?
+        if set['has_variants']
           set_key = set_key + "-" + set[:nv]
         end
         set[:k] = set_key

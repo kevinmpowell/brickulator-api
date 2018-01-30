@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180130025722) do
+ActiveRecord::Schema.define(version: 20180130032350) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -154,6 +154,7 @@ ActiveRecord::Schema.define(version: 20180130025722) do
     t.string "packaging_type"
     t.integer "instructions_count"
     t.string "brick_owl_item_id"
+    t.boolean "has_variants", default: false, null: false
     t.index ["number", "number_variant"], name: "index_lego_sets_on_number_and_number_variant", unique: true
   end
 
