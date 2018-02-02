@@ -155,6 +155,8 @@ class LegoSet < ApplicationRecord
         set.delete("updated_at")
         set.delete("created_at")
         set.delete("brick_owl_url")
+        set.delete("brick_owl_item_id")
+        set.delete("has_variants")
         set.delete("brickset_url")
         set.delete("minifig_count")
         set.delete("released")

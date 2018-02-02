@@ -7,7 +7,7 @@ class AuthenticationController < ApplicationController
       user = User.select(:preferences, :plus_member).where({email: auth_params[:email]}).first
       preferences = user.preferences
       preferences[:plus_member] = user.plus_member
-      json_response(auth_token: auth_token, preferences: preferences)
+      rot13_json_response(auth_token: auth_token, preferences: preferences)
     end
   end
 
