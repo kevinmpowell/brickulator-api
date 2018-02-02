@@ -5,7 +5,7 @@ class LegoSetsController < ApplicationController
   before_action :set_lego_set, only: [:show]
 
   def rot13(s)
-    s.tr('A-Za-z', 'N-ZA-Mn-za-m')
+    s.tr('A-Za-z', 'N-ZA-Mn-za-m').tr('1-9', '4-91-3')
   end
 
   # GET /lego_sets
