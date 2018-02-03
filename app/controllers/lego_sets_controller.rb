@@ -7,7 +7,8 @@ class LegoSetsController < ApplicationController
   # GET /lego_sets
   def index
     bypass_cache = index_params[:bypass_cache].nil? ? false : index_params[:bypass_cache]
-    lego_sets_object = LegoSet.all_sets_as_object(bypass_cache)
+    start_year = index_params[:start_year].nil? ? Time.now.year : index_params[:start_year]
+    lego_sets_object = LegoSet.all_sets_as_object(bypass_cache, start_year)
     rot13_json_response(lego_sets_object)
   end
 
@@ -22,6 +23,6 @@ class LegoSetsController < ApplicationController
   end
 
   def index_params
-    params.permit(:bypass_cache)
+    params.permit(:bypass_cache, :start_year)
   end
 end
