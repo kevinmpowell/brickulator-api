@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180130032350) do
+ActiveRecord::Schema.define(version: 20180207042400) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -136,6 +136,13 @@ ActiveRecord::Schema.define(version: 20180130032350) do
     t.float "complete_set_new_low_price"
     t.index ["lego_set_id"], name: "index_ebay_values_on_lego_set_id"
     t.index ["most_recent"], name: "index_ebay_values_on_most_recent", where: "most_recent"
+  end
+
+  create_table "exchange_rates", force: :cascade do |t|
+    t.datetime "retrieved_at"
+    t.jsonb "rates"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "lego_sets", force: :cascade do |t|
