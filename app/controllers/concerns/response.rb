@@ -9,6 +9,6 @@ module Response
   end
 
   def rot13_json_response(object, status = :ok)
-    render json: rot13(object.to_json), status: status
+    render json: rot13(object.to_json.gsub!(/\\u([0-9a-z]{4})/) {|s| [$1.to_i(16)].pack("U")}), status: status
   end
 end
