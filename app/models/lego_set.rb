@@ -27,7 +27,8 @@ class LegoSet < ApplicationRecord
     end
   end
 
-  def LegoSet.all_sets_as_object bypass_cache = false, year = Time.now.year
+  def LegoSet.all_sets_as_object bypass_cache = false, year = Time.now.year, language, country
+    puts country
     Rails.cache.fetch("all_sets_as_json#{year}", :expires_in => 15.minutes, :force => bypass_cache) do
       @lego_sets = LegoSet.all
       @id_tagged_sets = {}

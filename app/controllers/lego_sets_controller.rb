@@ -8,7 +8,7 @@ class LegoSetsController < ApplicationController
   def index
     bypass_cache = index_params[:bypass_cache].nil? ? false : index_params[:bypass_cache]
     year = index_params[:year].nil? ? Time.now.year : index_params[:year]
-    lego_sets_object = LegoSet.all_sets_as_object(bypass_cache, year)
+    lego_sets_object = LegoSet.all_sets_as_object(bypass_cache, year, @language, @country)
     rot13_json_response_safe_encode(lego_sets_object)
   end
 
