@@ -27,12 +27,12 @@ class LegoSet < ApplicationRecord
     end
   end
 
-  def LegoSet.all_sets_as_object bypass_cache = false, start_year = Time.now.year
-    Rails.cache.fetch("all_sets_as_json#{start_year}", :expires_in => 15.minutes, :force => bypass_cache) do
+  def LegoSet.all_sets_as_object bypass_cache = false, year = Time.now.year
+    Rails.cache.fetch("all_sets_as_json#{year}", :expires_in => 15.minutes, :force => bypass_cache) do
       @lego_sets = LegoSet.all
       @id_tagged_sets = {}
 
-      @lego_sets.includes(:most_recent_brick_owl_value, :most_recent_ebay_value, :most_recent_bricklink_value).where('year >= ?', start_year).order(:year, :number).each do |set|
+      @lego_sets.includes(:most_recent_brick_owl_value, :most_recent_ebay_value, :most_recent_bricklink_value).where('year >= ? AND year < ?', year, (year.to_i + 1)).order(:year, :number).each do |set|
         # ebay = set.ebay_sales.first
         bo = set.most_recent_brick_owl_value
         e = set.most_recent_ebay_value
@@ -144,7 +144,7 @@ class LegoSet < ApplicationRecord
         set[:n] = set['number']
         set[:nv] = set['number_variant']
         set[:y] = set['year']
-        set[:pcs] = set['part_count']
+        set[:pcs] = set['part_count'].nil? ? 0 : set['part_count']
 
         set.delete("year")
         set.delete("part_count")
