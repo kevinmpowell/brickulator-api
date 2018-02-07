@@ -38,6 +38,8 @@ gem 'bcrypt', '~> 3.1.7'
 gem 'jwt'
 gem 'gibbon'
 
+gem 'newrelic_rpm'
+
 group :test do
   gem 'factory_bot_rails'
   gem 'shoulda-matchers', '~> 3.1'
