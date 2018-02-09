@@ -39,6 +39,7 @@ gem 'jwt'
 gem 'gibbon'
 
 gem 'newrelic_rpm'
+gem 'http_accept_language'
 
 group :test do
   gem 'factory_bot_rails'
