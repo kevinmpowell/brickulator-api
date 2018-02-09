@@ -11,9 +11,9 @@ class LegoSetsController < ApplicationController
 
     country = index_params[:country].nil? ? @country : index_params[:country]
     language = index_params[:language].nil? ? @language : index_params[:language]
-    lego_sets_object = LegoSet.all_sets_as_object(bypass_cache, year, country, language)
-    # rot13_json_response_safe_encode(lego_sets_object)
-    json_response(lego_sets_object)
+    lego_sets_object = LegoSet.all_sets_as_object(bypass_cache, year, index_params[:currency], country, language)
+    rot13_json_response_safe_encode(lego_sets_object)
+    # json_response(lego_sets_object)
   end
 
   # GET /lego_sets/:id
@@ -27,6 +27,6 @@ class LegoSetsController < ApplicationController
   end
 
   def index_params
-    params.permit(:bypass_cache, :year, :country, :language)
+    params.permit(:bypass_cache, :year, :country, :language, :currency)
   end
 end
