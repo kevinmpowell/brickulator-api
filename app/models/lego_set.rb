@@ -164,6 +164,7 @@ class LegoSet < ApplicationRecord
         set[:nv] = set['number_variant']
         set[:y] = set['year']
         set[:pcs] = set['part_count'].nil? ? 0 : set['part_count']
+        set[:boURL] = set['brick_owl_url'].gsub(/\/catalog\//, '') unless set['brick_owl_url'].nil?
 
         set.delete("year")
         set.delete("part_count")
