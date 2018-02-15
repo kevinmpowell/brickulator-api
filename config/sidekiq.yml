@@ -11,4 +11,4 @@ production:
   - bricklink
   - default
 :limits:
-  brick_owl: 2
+  brick_owl: 1
