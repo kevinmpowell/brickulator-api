@@ -6,6 +6,7 @@ Rails.application.routes.draw do
   # TODO: Set CORS Headers at the environment level, so localhost:3000 can't make XHR requests to prod
   post 'subscribe', to: 'subscribers#create', constraints: lambda { |request| request.xhr? }
   post 'signup', to: 'users#create', constraints: lambda { |request| request.xhr? }
+  post '/users/update', to: 'users#update', constraints: lambda { |request| request.xhr? }
   post 'auth/signin', to: 'authentication#authenticate', constraints: lambda { |request| request.xhr? }
   get 'auth/validate-token', to: 'authentication#validate_token', constraints: lambda { |request| request.xhr? }
 

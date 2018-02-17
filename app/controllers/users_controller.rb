@@ -14,6 +14,14 @@ class UsersController < ApplicationController
     end
   end
 
+  def update
+    preferences = JSON.parse(user_params[:preferences])
+    @current_user.update_attributes({preferences: preferences})
+    preferences = @current_user.reload.preferences
+    preferences[:plus_member] = @current_user.plus_member
+    rot13_json_response({preferences: preferences})
+  end
+
   private
 
   def user_params
@@ -21,7 +29,8 @@ class UsersController < ApplicationController
       :name,
       :email,
       :password,
-      :password_confirmation
+      :password_confirmation,
+      :preferences
     )
   end
 end
