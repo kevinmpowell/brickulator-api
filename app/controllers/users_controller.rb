@@ -7,10 +7,57 @@ class UsersController < ApplicationController
     if User.find_by_email(user_params[:email])
       json_response({ message: Message.account_exists }, :unprocessable_entity)
     else
-      user = User.create!(user_params)
-      auth_token = AuthenticateUser.new(user.email, user.password).call
-      response = { message: Message.account_created, auth_token: auth_token }
-      json_response(response, :created)
+      user = User.new(user_params)
+
+      if user.valid?
+        if account_params[:account_type] == "free"
+          # Put them in the Brickulator Free Mailchimp Group
+          MailchimpService.add_brickulator_free_subscriber(user.email)
+          # Set default free member settings
+          user.plus_member = false
+          user.preferences = {
+            "country"=>account_params[:country], 
+            "currency"=>account_params[:currency]
+          }
+
+        elsif account_params[:account_type] == "plus"
+          # Put them in the Brickulator Plus Mailchimp Group
+          MailchimpService.add_brickulator_plus_subscriber(user.email)
+
+          # Set default plus member settings
+          user.plus_member = true
+          user.preferences = {
+            "country"=>account_params[:country], 
+            "currency"=>account_params[:currency],
+            "taxRate"=>"5",
+            "enableTaxes"=>true, 
+            "portletConfig"=>{
+              "eCLN"=>true, 
+              "eCLU"=>true, 
+              "eSVN"=>true, 
+              "eSVU"=>true, 
+              "blCLN"=>true, 
+              "blCLU"=>true, 
+              "blSVN"=>true, 
+              "blSVU"=>true, 
+              "boCLN"=>true, 
+              "boCLU"=>true, 
+              "boSVN"=>true, 
+              "boSVU"=>true
+            }, 
+            "enablePurchaseQuantity"=>true
+          }
+        end
+
+        user.save!
+        auth_token = AuthenticateUser.new(user.email, user.password).call
+        preferences = user.preferences
+        preferences[:plus_member] = user.plus_member
+        response = { message: Message.account_created, auth_token: auth_token, preferences: preferences }
+        rot13_json_response(response, :created)
+      else
+        json_response(user.errors.messages, :bad_request)
+      end
     end
   end
 
@@ -31,6 +78,14 @@ class UsersController < ApplicationController
       :password,
       :password_confirmation,
       :preferences
+    )
+  end
+
+  def account_params
+    params.permit(
+      :account_type,
+      :country,
+      :currency
     )
   end
 end
