@@ -4,6 +4,7 @@ class UsersController < ApplicationController
   # return authenticated token upon signup
   def create
     # Check if a user with that email already exists
+    puts user_params[:account_type]
     if User.find_by_email(user_params[:email])
       json_response({ message: Message.account_exists }, :unprocessable_entity)
     else
@@ -30,7 +31,8 @@ class UsersController < ApplicationController
       :email,
       :password,
       :password_confirmation,
-      :preferences
+      :preferences,
+      :account_type
     )
   end
 end
