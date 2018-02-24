@@ -34,6 +34,7 @@ class MailchimpService
       {
           body: {
               email_address: email,
+              status: "subscribed",
               interests: {
                 "#{BRICKULATOR_FREE_INTEREST_ID}": true, 
                 "#{BRICKULATOR_PLUS_INTEREST_ID}": false
@@ -48,6 +49,7 @@ class MailchimpService
       {
           body: {
               email_address: email,
+              status: "subscribed",
               interests: {
                 "#{BRICKULATOR_FREE_INTEREST_ID}": false, 
                 "#{BRICKULATOR_PLUS_INTEREST_ID}": true
@@ -62,6 +64,7 @@ class MailchimpService
       {
           body: {
               email_address: email,
+              status: "subscribed",
               interests: {
                 "#{BRICKULATOR_FREE_INTEREST_ID}": false, 
                 "#{BRICKULATOR_PLUS_INTEREST_ID}": false

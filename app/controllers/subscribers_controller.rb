@@ -3,7 +3,7 @@ class SubscribersController < ApplicationController
 
   # POST /subscribe
   def create
-    MailchimpService.subscribe_new_email_to_list(subscriber_params[:email])
+    MailchimpService.subscribe_user_by_email(subscriber_params[:email])
   end
 
   private
