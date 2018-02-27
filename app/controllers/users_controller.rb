@@ -21,6 +21,10 @@ class UsersController < ApplicationController
           }
 
         elsif account_params[:account_type] == "plus"
+          # Subscribe them to Brickulator Plus with stripe
+          stripeCustomer = StripeService.subscribeCustomerToBrickulatorPlus(user.email, account_params[:stripe_token])
+          user.stripe_id = stripeCustomer.id
+
           # Put them in the Brickulator Plus Mailchimp Group
           MailchimpService.add_brickulator_plus_subscriber(user.email)
 
@@ -85,7 +89,8 @@ class UsersController < ApplicationController
     params.permit(
       :account_type,
       :country,
-      :currency
+      :currency,
+      :stripe_token
     )
   end
 end
