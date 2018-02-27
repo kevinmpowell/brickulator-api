@@ -26,34 +26,35 @@ class BrickOwlService
     complete_set_data = get_complete_set_data(doc)
     brick_owl_values = brick_owl_values.merge(complete_set_data)
 
-    # Part Out Values
-    inventory_url = "#{url}#{INVENTORY_PAGE_URL_SUFFIX}"
-    part_out_data = get_part_out_values(inventory_url)
-    brick_owl_values = brick_owl_values.merge(part_out_data)
+    # Only get complete set and price history values for now
+    # # Part Out Values
+    # inventory_url = "#{url}#{INVENTORY_PAGE_URL_SUFFIX}"
+    # part_out_data = get_part_out_values(inventory_url)
+    # brick_owl_values = brick_owl_values.merge(part_out_data)
 
 
-    parts_links = doc.css(".associated-buttons a")
-    parts_urls = parts_links.reject{ |l| l["href"] == s.brick_owl_url }.map{ |l| l["href"] }
+    # parts_links = doc.css(".associated-buttons a")
+    # parts_urls = parts_links.reject{ |l| l["href"] == s.brick_owl_url }.map{ |l| l["href"] }
     
-    # Instructions Values
-    instructions_url = parts_urls.find{ |url| url.include?('instructions') }
-    if (instructions_url) 
-      instructions_data = get_instructions_data("#{BRICK_OWL_BASE_URL}#{instructions_url}")
-      brick_owl_values = brick_owl_values.merge(instructions_data)
-    end
+    # # Instructions Values
+    # instructions_url = parts_urls.find{ |url| url.include?('instructions') }
+    # if (instructions_url) 
+    #   instructions_data = get_instructions_data("#{BRICK_OWL_BASE_URL}#{instructions_url}")
+    #   brick_owl_values = brick_owl_values.merge(instructions_data)
+    # end
 
-    # Packaging Values
-    packaging_url = parts_urls.find{ |url| url.include?('packaging') }
-    if (packaging_url) 
-      packaging_data = get_packaging_data("#{BRICK_OWL_BASE_URL}#{packaging_url}")
-      brick_owl_values = brick_owl_values.merge(packaging_data)
-    end
+    # # Packaging Values
+    # packaging_url = parts_urls.find{ |url| url.include?('packaging') }
+    # if (packaging_url) 
+    #   packaging_data = get_packaging_data("#{BRICK_OWL_BASE_URL}#{packaging_url}")
+    #   brick_owl_values = brick_owl_values.merge(packaging_data)
+    # end
 
-    sticker_url = parts_urls.find{ |url| url.include?('sticker') }
-    if (sticker_url) 
-      sticker_data = get_sticker_data("#{BRICK_OWL_BASE_URL}#{sticker_url}")
-      brick_owl_values = brick_owl_values.merge(sticker_data)
-    end
+    # sticker_url = parts_urls.find{ |url| url.include?('sticker') }
+    # if (sticker_url) 
+    #   sticker_data = get_sticker_data("#{BRICK_OWL_BASE_URL}#{sticker_url}")
+    #   brick_owl_values = brick_owl_values.merge(sticker_data)
+    # end
 
     # Price history Values
     price_history_data = get_price_history_data(s, doc)
