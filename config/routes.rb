@@ -9,6 +9,9 @@ Rails.application.routes.draw do
   post '/users/update', to: 'users#update', constraints: lambda { |request| request.xhr? }
   post 'auth/signin', to: 'authentication#authenticate', constraints: lambda { |request| request.xhr? }
   get 'auth/validate-token', to: 'authentication#validate_token', constraints: lambda { |request| request.xhr? }
+  post 'password/forgot', to: 'passwords#forgot'
+  post 'password/reset', to: 'passwords#reset'
+  put 'password/update', to: 'passwords#update'
 
   Sidekiq::Web.use Rack::Auth::Basic do |username, password|
     # Protect against timing attacks:
