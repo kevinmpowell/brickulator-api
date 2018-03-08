@@ -20,10 +20,6 @@ class PasswordsController < ApplicationController
   def reset
     token = user_params[:reset_password_token].to_s
 
-    if user_params[:email].blank?
-      return render json: {error: 'Email not present'}
-    end
-
     if user_params[:password] != user_params[:password_confirmation]
       return render json: {error: 'Password and Password confirmation do not match'}
     end
