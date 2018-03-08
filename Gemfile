@@ -42,6 +42,7 @@ gem 'gibbon'
 
 gem 'newrelic_rpm'
 gem 'http_accept_language'
+gem 'sendgrid-ruby'
 
 group :test do
   gem 'factory_bot_rails'

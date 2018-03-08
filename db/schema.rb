@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180227031413) do
+ActiveRecord::Schema.define(version: 20180303021659) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -174,6 +174,8 @@ ActiveRecord::Schema.define(version: 20180227031413) do
     t.boolean "plus_member", default: false, null: false
     t.jsonb "preferences", default: {}, null: false
     t.string "stripe_id"
+    t.string "reset_password_token"
+    t.datetime "reset_password_sent_at"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["plus_member"], name: "index_users_on_plus_member"
   end

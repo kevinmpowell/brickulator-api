@@ -6,6 +6,7 @@ production:
 :logfile: ./log/sidekiq.log
 :queues:
   - priority
+  - mailers
   - brick_owl
   - ebay
   - bricklink
