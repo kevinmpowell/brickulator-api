@@ -2,7 +2,7 @@
 
 class StripeService
 
-  Stripe.api_key = ENV['STRIPE_SECRET_KEY_TEST']
+  Stripe.api_key = ENV['STRIPE_SECRET_KEY']
   BRICKULATOR_PLUS_PLAN_NAME = ENV['STRIPE_BRICKULATOR_PLUS_PLAN_NAME']
 
 
